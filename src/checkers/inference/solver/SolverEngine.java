@@ -16,6 +16,7 @@ import checkers.inference.solver.backend.SolverFactory;
 import checkers.inference.solver.backend.maxsat.MaxSatSolver;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.frontend.LatticeBuilder;
+import checkers.inference.solver.frontend.FenumLatticeBuilder;
 import checkers.inference.solver.strategy.PlainSolvingStrategy;
 import checkers.inference.solver.strategy.SolvingStrategy;
 import checkers.inference.solver.util.NameUtils;
@@ -112,8 +113,12 @@ public class SolverEngine implements InferenceSolver {
         configureSolverEngineArgs(solverEnvironment);
 
         //TODO: Add solve timing statistic.
-        Lattice lattice = new LatticeBuilder().buildLattice(qualHierarchy, slots);
+        //Lattice lattice = new LatticeBuilder().buildLattice(qualHierarchy, slots);
+        Lattice lattice = new FenumLatticeBuilder().buildLattice(qualHierarchy, slots);
         SolvingStrategy solvingStrategy = createSolvingStrategy();
+
+	System.out.println("using strategy: " + strategyName + "SolvingStrategy");
+
         InferenceResult inferenceResult = solvingStrategy.solve(solverEnvironment, slots, constraints, lattice);
 
         if (inferenceResult == null) {
@@ -159,6 +164,7 @@ public class SolverEngine implements InferenceSolver {
                 NameUtils.getSolverName(MaxSatSolver.class)
                 : solverName;
 
+	System.out.println("using " + this.solverName);
         this.collectStatistics = solverEnvironment.getBoolArg(SolverEngineArg.collectStatistics);
         this.writeSolutions = solverEnvironment.getBoolArg(SolverEngineArg.writeSolutions);
         this.noAppend = solverEnvironment.getBoolArg(SolverEngineArg.noAppend);

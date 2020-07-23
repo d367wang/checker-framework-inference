@@ -68,7 +68,8 @@ public class ConstantSlot extends VariableSlot {
 
     @Override
     public boolean isInsertable() {
-        return false;
+      //return false;
+        return true;
     }
 
     @Override

@@ -115,4 +115,10 @@ public class ExistentialVariableSlot extends VariableSlot {
     public String toString() {
         return "ExistentialVariableSlot(" + getId() + ", (" + potentialSlot.getId() + " | " + alternativeSlot.getId() +")";
     }
+
+
+    @Override
+    public boolean isInsertable() {
+	return true;
+    }
 }

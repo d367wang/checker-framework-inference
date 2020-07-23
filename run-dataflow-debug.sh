@@ -1,0 +1,1 @@
+./scripts/inference-dev --checker='dataflow.DataflowChecker' --solver='checkers.inference.solver.DebugSolver' --hacks=true --logLevel=FINER -m ROUNDTRIP -afud ./annotated testing/dataflow-inferrable-test/TestInt.java
