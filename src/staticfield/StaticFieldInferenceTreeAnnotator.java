@@ -13,6 +13,7 @@ import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.ElementUtils;
 import org.checkerframework.javacutil.TreeUtils;
 import staticfield.qual.StaticField;
+import staticfield.qual.NonStaticField;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -47,14 +48,23 @@ public class StaticFieldInferenceTreeAnnotator extends InferenceTreeAnnotator {
 
     @Override
     public Void visitVariable(VariableTree varTree, AnnotatedTypeMirror atm) {
-        Element elm = TreeUtils.elementFromDeclaration((VariableTree) varTree);
-        if(ElementUtils.isStatic(elm)) {
-            ProcessingEnvironment processingEnv = this.realTypeFactory.getProcessingEnv();
-            final Elements elements = processingEnv.getElementUtils();
-            AnnotationMirror anno = AnnotationBuilder.fromClass(elements, StaticField.class);
-            replaceATM(atm, anno);
-        }
-        return super.visitVariable(varTree, atm);
+      Element elm = TreeUtils.elementFromDeclaration(varTree);
+      ProcessingEnvironment processingEnv = this.realTypeFactory.getProcessingEnv();
+      final Elements elements = processingEnv.getElementUtils();
+
+      if(ElementUtils.isStatic(elm)) {
+        AnnotationMirror anno = AnnotationBuilder.fromClass(elements, StaticField.class);
+        replaceATM(atm, anno);
+                
+      } else if (TreeUtils.typeOf(varTree).getKind().isPrimitive()) {
+        AnnotationMirror anno = AnnotationBuilder.fromClass(elements, NonStaticField.class);
+        replaceATM(atm, anno);
+                
+      } else {
+        super.visitVariable(varTree, atm);
+                
+      }
+      return null;
     }
 
 

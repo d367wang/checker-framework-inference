@@ -7,6 +7,8 @@ CFI=$ROOT/checker-framework-inference
 AFU=$ROOT/annotation-tools/annotation-file-utilities
 export PATH=$AFU/scripts:$PATH
 
+CHECKER=staticfield.StaticFieldInferenceChecker
+
 IS_HACK=true
 
  DEBUG_SOLVER=checkers.inference.solver.DebugSolver
