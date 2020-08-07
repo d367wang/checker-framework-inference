@@ -89,7 +89,7 @@ public class RefinementVariableSlot extends VariableSlot {
      */
     @Override
     public boolean isInsertable() {
-      //return false;
-        return true;
+      return false;
+      //  return true;
     }
 }
