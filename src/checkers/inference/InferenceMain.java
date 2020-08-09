@@ -28,6 +28,9 @@ import checkers.inference.util.InferenceUtil;
 import checkers.inference.util.JaifBuilder;
 import org.checkerframework.javacutil.SystemUtil;
 
+import dummy.PurityInferenceController;
+
+
 /**
  * InferenceMain is the central coordinator to the inference system.
  *
@@ -142,14 +145,16 @@ public class InferenceMain {
 
         // Start up javac
         startCheckerFramework();
-        solve();
+        //solve();
+        PurityInferenceController.getInstance().solve();
+        
         // solverResult = null covers case when debug solver is used, but in this case
         // shouldn't exit
         if (solverResult != null && !solverResult.hasSolution()) {
             logger.info("No solution, exiting...");
             System.exit(1);
         }
-        writeJaif();
+        //writeJaif();
     }
 
     /**
@@ -297,7 +302,7 @@ public class InferenceMain {
         return visitor;
     }
 
-    private InferrableChecker getRealChecker() {
+    public InferrableChecker getRealChecker() {
         if (realChecker == null) {
             try {
                 realChecker = (InferrableChecker) Class.forName(
@@ -313,7 +318,7 @@ public class InferenceMain {
         return realChecker;
     }
 
-    private InferenceAnnotatedTypeFactory getInferenceTypeFactory() {
+    public InferenceAnnotatedTypeFactory getInferenceTypeFactory() {
         if (inferenceTypeFactory == null) {
             inferenceTypeFactory = realChecker.createInferenceATF(inferenceChecker, getRealChecker(),
                     getRealTypeFactory(), getSlotManager(), getConstraintManager());
