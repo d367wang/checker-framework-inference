@@ -42,21 +42,34 @@ public class PurityConstraintConverter {
 
     public void convert() {
         // create variable slot for all methods
-        for(String s:idToMethodSlots.keySet()) {
+        for (String s : idToMethodSlots.keySet()) {
             System.out.println(s);
             System.out.println(idToMethodSlots.get(s));
         }
+
+        ConstantSlot pureSlot = (ConstantSlot) convertToVariableSlot(methodSlotManager.getPureSlot());
+        ConstantSlot impureSlot = (ConstantSlot) convertToVariableSlot(methodSlotManager.getImpureSlot());
+        methodToVariableSlot.put(methodSlotManager.getPureSlot().getId(), pureSlot);
+        methodToVariableSlot.put(methodSlotManager.getImpureSlot().getId(), impureSlot);
+
         for (Map.Entry<String, MethodSlot> entry : idToMethodSlots.entrySet()) {
             String id = entry.getKey();
             MethodSlot methodSlot = entry.getValue();
 
+            if (!methodSlot.isConstant()) {
+                VariableSlot varSlot = convertToVariableSlot(methodSlot);
 
-            VariableSlot varSlot = convertToVariableSlot(methodSlot);
+                System.out.println("create slot for " + id);
+                System.out.println(varSlot);
+                methodToVariableSlot.put(id, varSlot);
+                if (!equalTo.keySet().contains(id)) {
+                    constraintManager.addPreferenceConstraint(varSlot, pureSlot, 3);
+                }
+            }
+        }
 
-
-            System.out.println("create slot for " + id);
-            System.out.println(varSlot);
-            methodToVariableSlot.put(id, varSlot);
+        for (Map.Entry<String, VariableSlot> e3:methodToVariableSlot.entrySet()) {
+          System.out.println(e3.getKey() + " -> " + e3.getValue());
         }
 
         // add equality constraints
@@ -78,7 +91,7 @@ public class PurityConstraintConverter {
     }
 
     private VariableSlot convertToVariableSlot(MethodSlot methodSlot) {
-        if(methodSlot.isConstant()) {
+        if (methodSlot.isConstant()) {
             return slotManager.createConstantSlot(methodSlot.getAnno());
         }
         AnnotationLocation location = methodSlot.getLocation();

@@ -1,13 +1,13 @@
-import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.Deterministic;
+//import org.checkerframework.dataflow.qual.Pure;
+//import org.checkerframework.dataflow.qual.Deterministic;
 
 
 public class PureTest {
 	int field;
 
 	//@Pure
-	void foo(int x, int y) {
-		field = 0;
+	void foo() {
+		//field = 0;
 	}
 	
 	//@Deterministic 
@@ -17,5 +17,17 @@ public class PureTest {
 
 	}
 
+	void m1(A a) {
+		a.z = 0;
+	}
+
+	void m2(A a) {
+		A aa = new A();
+		aa.z = 0;
+	}
+
 }
 
+class A {
+	int z;
+}

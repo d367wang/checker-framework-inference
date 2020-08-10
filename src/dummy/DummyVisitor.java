@@ -65,11 +65,21 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
 
         // lhs is a field access
         if (TreeUtils.isFieldAccess(variable)) {
-            if (TreeUtils.getReceiverTree(variable) == null) {
+            ExpressionTree receiver = TreeUtils.getReceiverTree(variable);
+          
+            if (receiver == null) {
                 // modify this object / static field -> impure
                 System.out.println("modify this object");
                 methodSlotManager.addEqualityConstraint(currentMethod.getSimpleName().toString(),
                         methodSlotManager.getImpureSlot().getId());
+
+            } else if(receiver.getKind() == Tree.Kind.IDENTIFIER){
+              if(!TreeUtils.isLocalVariable(receiver)) {
+                System.out.println("write non-local variable");
+                methodSlotManager.addEqualityConstraint(currentMethod.getSimpleName().toString(),
+                                                        methodSlotManager.getImpureSlot().getId());
+              }
+                          
             }
         } else if (variable instanceof ArrayAccessTree) {
             // lhs is array access
