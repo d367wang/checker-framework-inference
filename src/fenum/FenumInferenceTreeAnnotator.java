@@ -14,6 +14,7 @@ import fenum.qual.Fenum;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.TreeUtils;
+import org.checkerframework.javacutil.ElementUtils;
 
 import checkers.inference.*;
 
@@ -48,13 +49,13 @@ public class FenumInferenceTreeAnnotator extends InferenceTreeAnnotator {
         this.slotManager = InferenceMain.getInstance().getSlotManager();
     }
 
-
+  /*
     @Override
     public Void visitAnnotatedType(AnnotatedTypeTree node, AnnotatedTypeMirror atm) {
       //System.out.println("fenum inference tree annotator is visiting annotated type tree");
         return super.visitAnnotatedType(node, atm);
     }
-
+  */
 
       @Override
       public Void visitAssignment(AssignmentTree assignmentTree, AnnotatedTypeMirror type) {
@@ -64,18 +65,18 @@ public class FenumInferenceTreeAnnotator extends InferenceTreeAnnotator {
         return super.visitAssignment(assignmentTree, type);
       }
 
+  /*
   @Override
-  public Void visitMemberSelect(MemberSelectTree node, AnnotatedTypeMirror type) {
-    //System.out.println("fenum inference tree annotator is visiting member select tree: " + node.getIdentifier().toString());
-    return super.visitMemberSelect(node, type);
-        
+      public Void visitMemberSelect(MemberSelectTree node, AnnotatedTypeMirror type) {
+       //System.out.println("fenum inference tree annotator is visiting member select tree: " + node.getIdentifier().toString());
+        return super.visitMemberSelect(node, type);
   }
+  
 
       @Override
       public Void visitClass(ClassTree classTree, AnnotatedTypeMirror classType) {
         //System.out.println("fenum inference tree annotator is visiting class tree");
         return super.visitClass(classTree, classType);
-            
       }
 
       @Override
@@ -112,6 +113,7 @@ public class FenumInferenceTreeAnnotator extends InferenceTreeAnnotator {
         return super.visitNewClass(newClassTree, atm);
             
       }
+  */
 
       @Override
       public Void visitVariable(VariableTree varTree, AnnotatedTypeMirror atm) {
@@ -152,6 +154,8 @@ public class FenumInferenceTreeAnnotator extends InferenceTreeAnnotator {
             
       }
 
+
+  /*
       @Override
       public Void visitNewArray(NewArrayTree newArrayTree, AnnotatedTypeMirror atm) {
         //System.out.println("fenum inference tree annotator is visiting new array tree");
@@ -172,14 +176,35 @@ public class FenumInferenceTreeAnnotator extends InferenceTreeAnnotator {
         return super.visitInstanceOf(instanceOfTree, atm);
             
       }
+  */
+  
 
       @Override
       public Void visitLiteral(LiteralTree literalTree, AnnotatedTypeMirror atm) {
         System.out.println("fenum inference tree annotator is visiting literal tree: " + literalTree.getValue().toString());
+
+        TreePath path = atypeFactory.getPath(literalTree);
+        if (path != null) {
+          final TreePath parentPath = path.getParentPath();
+          final Tree parentNode = parentPath.getLeaf();
+          if (parentNode.getKind() == Tree.Kind.ASSIGNMENT) {
+            ExpressionTree varTree = ((AssignmentTree) parentNode).getVariable();
+            if (varTree.getKind() == Tree.Kind.VARIABLE) {
+              final Element varElem = TreeUtils.elementFromDeclaration((VariableTree)varTree);
+              if (ElementUtils.isFinal(varElem) && ElementUtils.isStatic(varElem)) {
+                System.out.println("********************assign literal to a final static variable****************");
+                                    
+              }
+            }
+          }
+        }
+        
         return super.visitLiteral(literalTree, atm);
             
       }
 
+
+  /*
       @Override
       public Void visitUnary(UnaryTree node, AnnotatedTypeMirror type) {
         //System.out.println("fenum inference tree annotator is visiting unary tree");
@@ -207,5 +232,6 @@ public class FenumInferenceTreeAnnotator extends InferenceTreeAnnotator {
         return super.visitParameterizedType(param, atm);
             
       }
+  */
 
 }
