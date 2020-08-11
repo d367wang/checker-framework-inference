@@ -13,6 +13,7 @@ import fenum.qual.Fenum;
 
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.ElementUtils;
 
@@ -38,6 +39,11 @@ public class FenumInferenceTreeAnnotator extends InferenceTreeAnnotator {
   private final AnnotatedTypeFactory realTypeFactory;
   private final SlotManager slotManager;
 
+  public static final Logger logger = Logger.getLogger(FenumInferenceTreeAnnotator.class.getSimpleName());
+  
+  private final AnnotationMirror realTop;
+  
+
     public FenumInferenceTreeAnnotator(InferenceAnnotatedTypeFactory atypeFactory,
                                        InferrableChecker realChecker,
                                        AnnotatedTypeFactory realAnnotatedTypeFactory,
@@ -47,77 +53,36 @@ public class FenumInferenceTreeAnnotator extends InferenceTreeAnnotator {
         this.variableAnnotator = variableAnnotator;
         this.realTypeFactory = realAnnotatedTypeFactory;
         this.slotManager = InferenceMain.getInstance().getSlotManager();
+
+        this.realTop = realTypeFactory.getQualifierHierarchy().getTopAnnotations().iterator().next();
+        
     }
 
   /*
-    @Override
-    public Void visitAnnotatedType(AnnotatedTypeTree node, AnnotatedTypeMirror atm) {
-      //System.out.println("fenum inference tree annotator is visiting annotated type tree");
-        return super.visitAnnotatedType(node, atm);
-    }
-  */
-
       @Override
       public Void visitAssignment(AssignmentTree assignmentTree, AnnotatedTypeMirror type) {
         //logger.fine("------------------------ visiting assignment tree ---------------------------");
-            System.out.println("fenum inference tree annotator is visiting assignment tree");
+            System.out.println("\nfenum inference tree annotator is visiting assignment tree");
+            System.out.println("assignment tree type is " + type.getClass().getSimpleName() + "\n");
             //InferenceMain.getInstance().logger.fine("fenum inference tree annotator is visiting assignment tree");
         return super.visitAssignment(assignmentTree, type);
       }
-
-  /*
-  @Override
-      public Void visitMemberSelect(MemberSelectTree node, AnnotatedTypeMirror type) {
-       //System.out.println("fenum inference tree annotator is visiting member select tree: " + node.getIdentifier().toString());
-        return super.visitMemberSelect(node, type);
-  }
-  
-
-      @Override
-      public Void visitClass(ClassTree classTree, AnnotatedTypeMirror classType) {
-        //System.out.println("fenum inference tree annotator is visiting class tree");
-        return super.visitClass(classTree, classType);
-      }
+*/
 
       @Override
       public Void visitIdentifier(IdentifierTree node, AnnotatedTypeMirror identifierType) {
-        System.out.println("fenum inference tree annotator is visiting identifier: " + node.getName().toString());
+        System.out.println("\nfenum inference tree annotator is visiting identifier: " + node.getName().toString());
+            System.out.println("identifier tree type is " + identifierType.getClass().getSimpleName() + "\n");
         return super.visitIdentifier(node, identifierType);
             
       }
 
-      @Override
-      public Void visitTypeParameter(TypeParameterTree typeParamTree, AnnotatedTypeMirror atm) {
-        //System.out.println("fenum inference tree annotator is visiting type parameter tree");
-        return super.visitTypeParameter(typeParamTree, atm);
-            
-      }
-
-      @Override
-      public Void visitMethod(MethodTree methodTree, AnnotatedTypeMirror atm) {
-        System.out.println("fenum inference tree annotator is visiting method tree: " + methodTree.getName().toString());
-        return super.visitMethod(methodTree, atm);
-            
-      }
-
-      @Override
-      public Void visitMethodInvocation(MethodInvocationTree methodInvocationTree, AnnotatedTypeMirror atm) {
-        //System.out.println("fenum inference tree annotator is visiting method invocation tree");
-        return super.visitMethodInvocation(methodInvocationTree, atm);
-            
-      }
-
-      @Override
-      public Void visitNewClass(NewClassTree newClassTree, AnnotatedTypeMirror atm) {
-            System.out.println("fenum inference tree annotator is visiting new class tree");
-        return super.visitNewClass(newClassTree, atm);
-            
-      }
-  */
 
       @Override
       public Void visitVariable(VariableTree varTree, AnnotatedTypeMirror atm) {
-        System.out.println("fenum inference tree annotator is visiting variable tree: " + varTree.getName().toString());
+        System.out.println("\nfenum inference tree annotator is visiting variable tree: " + varTree.getName().toString());
+            System.out.println("variable tree type is " + atm.getClass().getSimpleName() + "\n");
+            
         //final VariableElement varElem = TreeUtils.elementFromDeclaration(varTree);
         // AnnotationMirror anno = realTypeFactory.getDeclAnnotation(varElem, Fenum.class);
         AnnotationMirror anno = realTypeFactory.getAnnotationMirror(varTree, Fenum.class);
@@ -154,84 +119,39 @@ public class FenumInferenceTreeAnnotator extends InferenceTreeAnnotator {
             
       }
 
-
-  /*
-      @Override
-      public Void visitNewArray(NewArrayTree newArrayTree, AnnotatedTypeMirror atm) {
-        //System.out.println("fenum inference tree annotator is visiting new array tree");
-        return super.visitNewArray(newArrayTree, atm);
-            
-      }
-
-      @Override
-      public Void visitTypeCast(TypeCastTree typeCast, AnnotatedTypeMirror atm) {
-            System.out.println("fenum inference tree annotator is visiting type cast tree");
-        return super.visitTypeCast(typeCast, atm);
-            
-      }
-
-      @Override
-      public Void visitInstanceOf(InstanceOfTree instanceOfTree, AnnotatedTypeMirror atm) {
-        //System.out.println("fenum inference tree annotator is visiting instanceof tree");
-        return super.visitInstanceOf(instanceOfTree, atm);
-            
-      }
-  */
-  
+ 
 
       @Override
       public Void visitLiteral(LiteralTree literalTree, AnnotatedTypeMirror atm) {
-        System.out.println("fenum inference tree annotator is visiting literal tree: " + literalTree.getValue().toString());
+        System.out.println("\nfenum inference tree annotator is visiting literal tree: " + literalTree.getValue().toString());
+            System.out.println("literal tree type is " + atm.getClass().getSimpleName() + "\n");
 
         TreePath path = atypeFactory.getPath(literalTree);
         if (path != null) {
           final TreePath parentPath = path.getParentPath();
           final Tree parentNode = parentPath.getLeaf();
-          if (parentNode.getKind() == Tree.Kind.ASSIGNMENT) {
-            ExpressionTree varTree = ((AssignmentTree) parentNode).getVariable();
-            if (varTree.getKind() == Tree.Kind.VARIABLE) {
-              final Element varElem = TreeUtils.elementFromDeclaration((VariableTree)varTree);
+          System.out.println("parentNode of the literal is " + parentNode.getClass().getSimpleName());
+          if (parentNode.getKind() == Tree.Kind.VARIABLE) {
+                System.out.println("********************assign literal to variable ***********************");
+              final Element varElem = TreeUtils.elementFromDeclaration((VariableTree)parentNode);
               if (ElementUtils.isFinal(varElem) && ElementUtils.isStatic(varElem)) {
                 System.out.println("********************assign literal to a final static variable****************");
-                                    
+
+                AnnotatedTypeMirror parentATM = atypeFactory.getAnnotatedType(parentNode);
+                AnnotationMirror am = parentATM.getAnnotationInHierarchy(this.realTop);
+                if(am != null) {
+                  final ConstantSlot cs = slotManager.createConstantSlot(am);
+                  AnnotationBuilder ab = new AnnotationBuilder(realTypeFactory.getProcessingEnv(), VarAnnot.class);
+                  ab.setValue("value", cs.getId());
+                  AnnotationMirror varAnno = ab.build();
+                  atm.replaceAnnotation(varAnno);
+                                      
+                }
               }
             }
-          }
         }
-        
         return super.visitLiteral(literalTree, atm);
             
       }
-
-
-  /*
-      @Override
-      public Void visitUnary(UnaryTree node, AnnotatedTypeMirror type) {
-        //System.out.println("fenum inference tree annotator is visiting unary tree");
-        return super.visitUnary(node, type);
-            
-      }
-
-      @Override
-      public Void visitCompoundAssignment(CompoundAssignmentTree node, AnnotatedTypeMirror type) {
-            System.out.println("fenum inference tree annotator is visiting compound assignment tree");
-        return super.visitCompoundAssignment(node, type);
-            
-      }
-
-      @Override
-      public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
-        //System.out.println("fenum inference tree annotator is visiting binary tree");
-        return super.visitBinary(node, type);
-            
-      }
-
-      @Override
-      public Void visitParameterizedType(ParameterizedTypeTree param, AnnotatedTypeMirror atm) {
-        //System.out.println("fenum inference tree annotator is visiting parameterized type tree");
-        return super.visitParameterizedType(param, atm);
-            
-      }
-  */
 
 }

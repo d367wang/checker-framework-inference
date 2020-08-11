@@ -2,6 +2,8 @@ package fenum;
 
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.VariableTree;
+import com.sun.source.tree.AssignmentTree;
+import com.sun.source.tree.LiteralTree;
 
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceVisitor;
@@ -28,6 +30,8 @@ public class FenumInfVisitor extends InferenceVisitor<FenumInfChecker, BaseAnnot
 
     @Override
     public Void visitVariable(VariableTree node, Void p) {
+      System.out.println("\nFenumInfVisitor visiting variable tree\n");
+      
       AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node);
       mainIsNot(type, realChecker.FENUM_BOTTOM, "not.fenumbottom", node);
 
@@ -46,5 +50,20 @@ public class FenumInfVisitor extends InferenceVisitor<FenumInfChecker, BaseAnnot
                   
         }
         return super.visitMethod(node, p);
+      }
+
+
+    @Override
+    public Void visitAssignment(AssignmentTree node, Void p) {
+      System.out.println("\nFenumInfVisitor visiting assignment tree\n");
+      return super.visitAssignment(node, p);
+          
+    }
+
+      @Override
+      public Void visitLiteral(LiteralTree node, Void p) {
+        System.out.println("\nFenumInfVisitor visiting literal tree\n");
+        return super.visitLiteral(node, p);
+            
       }
 }

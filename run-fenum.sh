@@ -25,7 +25,7 @@ CFI_LIB=$CFI/lib
 export DYLD_LIBRARY_PATH=$CFI_LIB
 export LD_LIBRARY_PATH=$CFI_LIB
 
-$CFI/scripts/inference-dev --checker "$CHECKER" --solver "$SOLVER" --solverArgs="collectStatistics=true" --hacks="$IS_HACK" --logLevel=FINER -m ROUNDTRIP -afud ./annotated "$@"
+$CFI/scripts/inference-dev --checker "$CHECKER" --solver "$SOLVER" --solverArgs="collectStatistics=true" --hacks="$IS_HACK" --logLevel=FINE -m ROUNDTRIP -afud ./annotated "$@"
 
 # TYPE CHECKING
 # $CFI/scripts/inference-dev --checker "$CHECKER" --solver "$SOLVER" --solverArgs="collectStatistics=true,solver=z3" --hacks="$IS_HACK" -m TYPECHECK "$@"
