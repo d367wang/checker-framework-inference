@@ -69,4 +69,15 @@ public class DummyAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     return new GraphQualifierHierarchy(createQualifierHierarchyFactory(), IMPURE);
     
   }
+
+
+  public final Set<Class<? extends Annotation>> getPurityTypeQualifiers() {
+      Set<Class<? extends Annotation>> qualSet =
+                getBundledTypeQualifiers(
+                    Pure.class,
+                    Impure.class
+      );
+      return qualSet;
+                
+  }
 }

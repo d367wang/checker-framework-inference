@@ -1,6 +1,8 @@
 package dummy;
 
 import com.sun.source.tree.*;
+import com.sun.tools.javac.code.Symbol.MethodSymbol;
+
 import dummy.purity.PurityChecker;
 import dummy.purity.qual.Impure;
 import dummy.purity.qual.Pure;
@@ -24,7 +26,7 @@ import java.util.List;
 
 public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedTypeFactory>  {
 
-    private ExecutableElement currentMethod;
+    private MethodSlot currentMethodSlot;
     private MethodSlotManager methodSlotManager;
 
     public DummyVisitor(DummyChecker checker, InferenceChecker ichecker,
@@ -32,29 +34,44 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
         super(checker, ichecker, factory, infer);
         methodSlotManager = PurityInferenceController.getInstance().getMethodSlotManager();
 
-        setAnnotations();
     }
 
 
-    protected void setAnnotations() {
-
-    }
-
+  
     @Override
     public Void visitMethod(MethodTree node, Void p) {
         final ExecutableElement methodElem = TreeUtils.elementFromDeclaration(node);
-        currentMethod = methodElem;
 
         MethodSlot methodSlot = methodSlotManager.addNewMethodSlot(atypeFactory, node);
+        currentMethodSlot = methodSlot;
 
+        AnnotationMirror anno = atypeFactory.getDeclAnnotation(methodElem, Pure.class);
+        if (anno != null) {
+          methodSlotManager.addEqualityConstraint(methodSlot.getId(),
+                                                  methodSlotManager.getPureSlot().getId());
+                  
+        }
+
+        anno = atypeFactory.getDeclAnnotation(methodElem, Impure.class);
+        if (anno != null) {
+          methodSlotManager.addEqualityConstraint(methodSlot.getId(),
+                                                  methodSlotManager.getImpureSlot().getId());
+                  
+        }
+        
+        /*
         if (methodElem.getKind() == ElementKind.CONSTRUCTOR) {
 
         } else if (methodElem.getKind() == ElementKind.METHOD) {
-            List<? extends AnnotationMirror> allAnnos = methodElem.getAnnotationMirrors();
-            System.out.println("annotations on method " + currentMethod);
-            System.out.println(allAnnos);
-
+            
         }
+        List<? extends AnnotationMirror> allAnnos = methodElem.getAnnotationMirrors();
+        System.out.println("annotations on method " + currentMethod);
+        System.out.println(allAnnos);
+        */
+
+        System.out.println("\nvisiting method -------" + methodSlot.getId());
+
         return super.visitMethod(node, p);
     }
 
@@ -70,13 +87,13 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
             if (receiver == null) {
                 // modify this object / static field -> impure
                 System.out.println("modify this object");
-                methodSlotManager.addEqualityConstraint(currentMethod.getSimpleName().toString(),
+                methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
                         methodSlotManager.getImpureSlot().getId());
 
             } else if(receiver.getKind() == Tree.Kind.IDENTIFIER){
               if(!TreeUtils.isLocalVariable(receiver)) {
                 System.out.println("write non-local variable");
-                methodSlotManager.addEqualityConstraint(currentMethod.getSimpleName().toString(),
+                methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
                                                         methodSlotManager.getImpureSlot().getId());
               }
                           
@@ -94,11 +111,11 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
     @Override
     public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
         final ExecutableElement methodElem = TreeUtils.elementFromUse(node);
-        System.out.println(currentMethod.getSimpleName() + " call " + methodElem.getSimpleName());
+        System.out.println("\n" + currentMethodSlot.getId() + " call " + methodElem.getSimpleName());
 
         methodSlotManager.addSubtypeOfConstraint(
-                currentMethod.getSimpleName().toString(),
-                methodElem.getSimpleName().toString());
+            currentMethodSlot.getId(),
+            MethodSlot.generateMethodId(methodElem));
 
         return super.visitMethodInvocation(node, p);
     }

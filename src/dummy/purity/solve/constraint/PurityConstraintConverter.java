@@ -41,12 +41,10 @@ public class PurityConstraintConverter {
 
 
     public void convert() {
-        // create variable slot for all methods
-        for (String s : idToMethodSlots.keySet()) {
-            System.out.println(s);
-            System.out.println(idToMethodSlots.get(s));
-        }
 
+        Set<String> methodIds = idToMethodSlots.keySet();
+      
+        // create variable slot for all methods
         ConstantSlot pureSlot = (ConstantSlot) convertToVariableSlot(methodSlotManager.getPureSlot());
         ConstantSlot impureSlot = (ConstantSlot) convertToVariableSlot(methodSlotManager.getImpureSlot());
         methodToVariableSlot.put(methodSlotManager.getPureSlot().getId(), pureSlot);
@@ -59,8 +57,6 @@ public class PurityConstraintConverter {
             if (!methodSlot.isConstant()) {
                 VariableSlot varSlot = convertToVariableSlot(methodSlot);
 
-                System.out.println("create slot for " + id);
-                System.out.println(varSlot);
                 methodToVariableSlot.put(id, varSlot);
                 if (!equalTo.keySet().contains(id)) {
                     constraintManager.addPreferenceConstraint(varSlot, pureSlot, 3);
@@ -82,21 +78,28 @@ public class PurityConstraintConverter {
         // add subtype constraints
         for (Map.Entry<String, Set<String>> e2 : subtypeOf.entrySet()) {
             VariableSlot s1 = methodToVariableSlot.get(e2.getKey());
-            Set<String> methodIds = e2.getValue();
-            for (String m : methodIds) {
-                VariableSlot s2 = methodToVariableSlot.get(m);
-                constraintManager.addSubtypeConstraint(s1, s2);
+            Set<String> callees = e2.getValue();
+            for (String m : callees) {
+                if (methodIds.contains(m)) {
+                    VariableSlot s2 = methodToVariableSlot.get(m);
+                    System.out.println("\nadding subtype: " + e2.getKey() + " <: " + m);
+                    System.out.println("adding subtype: " + s1 + " <: " + s2 + "\n");
+
+                    constraintManager.addSubtypeConstraint(s1, s2);
+                }
             }
         }
     }
+
+  
 
     private VariableSlot convertToVariableSlot(MethodSlot methodSlot) {
         if (methodSlot.isConstant()) {
             return slotManager.createConstantSlot(methodSlot.getAnno());
         }
         AnnotationLocation location = methodSlot.getLocation();
-        System.out.println(methodSlot.getId() + " location");
-        System.out.println(location);
+        //System.out.println(methodSlot.getId() + " location");
+        //System.out.println(location);
         VariableSlot varSlot = slotManager.createVariableSlot(location);
         return varSlot;
     }

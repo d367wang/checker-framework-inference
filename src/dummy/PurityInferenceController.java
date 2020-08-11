@@ -1,12 +1,18 @@
 package dummy;
 
 import checkers.inference.*;
+import checkers.inference.model.AnnotationLocation;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.ConstraintManagerForMethod;
+
+import checkers.inference.model.VariableSlot;
+import checkers.inference.qual.VarAnnot;
 
 import checkers.inference.solver.frontend.LatticeBuilder;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.frontend.TwoQualifiersLattice;
+
+import checkers.inference.util.JaifBuilder;
 
 import dummy.purity.PurityAnnotatedTypeFactory;
 import dummy.purity.SlotManagerForMethod;
@@ -14,7 +20,12 @@ import dummy.purity.solve.constraint.PurityConstraintConverter;
 import dummy.purity.solve.solver.PuritySolverEngine;
 import dummy.purity.utils.MethodSlotManager;
 
-import java.util.HashMap;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+
+import java.lang.annotation.Annotation;
+
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,13 +33,15 @@ import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.type.QualifierHierarchy;
 
+import javax.lang.model.element.AnnotationMirror;
+
 public class PurityInferenceController {
     public final Logger logger = Logger.getLogger(PurityInferenceController.class.getName());
 
     private static PurityInferenceController mPurityInferenceController;
 
     private BaseInferrableChecker dummyChecker;
-    private BaseAnnotatedTypeFactory dummyTypeFactory;
+    private DummyAnnotatedTypeFactory dummyTypeFactory;
 
     private SlotManagerForMethod slotManagerForMethod;
     private ConstraintManagerForMethod constraintManagerForMethod;
@@ -44,7 +57,7 @@ public class PurityInferenceController {
         }
         mPurityInferenceController = this;
         dummyChecker = (BaseInferrableChecker)InferenceMain.getInstance().getRealChecker();
-        dummyTypeFactory = InferenceMain.getInstance().getRealTypeFactory();
+        dummyTypeFactory = (DummyAnnotatedTypeFactory)InferenceMain.getInstance().getRealTypeFactory();
     }
 
   public static PurityInferenceController getInstance() {
@@ -126,6 +139,8 @@ public class PurityInferenceController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        writeJaif();
     }
 
 
@@ -135,4 +150,64 @@ public class PurityInferenceController {
         }
         return methodSlotManager;
     }
+
+
+
+  private void writeJaif() {
+    try (PrintWriter writer
+         = new PrintWriter(new FileOutputStream(InferenceOptions.jaifFile))) {
+
+      List<VariableSlot> varSlots = slotManagerForMethod.getVariableSlots();
+      Map<AnnotationLocation, String> values = new HashMap<>();
+      Set<Class<? extends Annotation>> annotationClasses = new HashSet<>();
+
+      if (solverResult == null) {
+        annotationClasses.add(VarAnnot.class);
+                    
+      } else {
+        for (Class<? extends Annotation> annotation : dummyTypeFactory.getPurityTypeQualifiers()) {
+          annotationClasses.add(annotation);
+                          
+        }
+        // add any custom annotations that must be inserted to the JAIF header, such as alias annotations
+        //                for (Class<? extends Annotation> annotation : dummyChecker.additionalAnnotationsForJaifHeaderInsertion()) {
+        //                    annotationClasses.add(annotation);
+        //                }
+                    
+      }
+      for (VariableSlot slot : varSlots) {
+        if (slot.getLocation() != null && slot.isInsertable()
+            && (solverResult == null || solverResult.containsSolutionForVariable(slot.getId()))) {
+          // TODO: String serialization of annotations.
+          if (solverResult != null) {
+            // Not all VariableSlots will have an inferred value.
+            // This happens for VariableSlots that have no constraints.
+            AnnotationMirror result = solverResult.getSolutionForVariable(slot.getId());
+            if (result != null) {
+              values.put(slot.getLocation(), result.toString());
+                                      
+            }
+                                
+          } else {
+            // Just use the VarAnnot in the jaif.
+            String value = slotManagerForMethod.getAnnotation(slot).toString();
+            values.put(slot.getLocation(), value);
+                                
+          }
+                          
+        }
+                    
+      }
+
+      JaifBuilder builder = new JaifBuilder(values, annotationClasses, dummyChecker.isInsertMainModOfLocalVar());
+      String jaif = builder.createJaif();
+      writer.println(jaif);
+
+              
+    } catch (Exception e) {
+      logger.log(Level.SEVERE, "Failed to write out jaif file!", e);
+              
+    }
+        
+  }
 }
