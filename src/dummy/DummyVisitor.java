@@ -117,6 +117,13 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
             currentMethodSlot.getId(),
             MethodSlot.generateMethodId(methodElem));
 
+        AnnotationMirror anno = atypeFactory.getDeclAnnotation(methodElem, Impure.class);
+        System.out.println(methodElem.getSimpleName() + "has annotation " + anno + "\n");
+        if (anno != null) {
+            methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
+                                                    methodSlotManager.getImpureSlot().getId());
+            System.out.println(currentMethodSlot.getId() +  "is impure");
+        }
         return super.visitMethodInvocation(node, p);
     }
 }

@@ -1,5 +1,7 @@
 package checkers.inference;
 
+import dummy.DummyChecker;
+import dummy.solver.DummySolverEngine;
 
 import org.checkerframework.framework.util.CheckerMain;
 import org.checkerframework.javacutil.SystemUtil;
@@ -254,6 +256,10 @@ public class InferenceOptions {
                         SinkSolver.class,
                         new File(srcDir, "sparta"+ File.separator +"checkers" + File.separator + "information_flow.astub")));
 
+        typesystems.put("dummy",
+                new TypeSystemSpec(DummyChecker.class,
+                        DummySolverEngine.class,
+                        new File(srcDir, "dummy" + File.separator + "jdk.astub")));
     }
 
     /**

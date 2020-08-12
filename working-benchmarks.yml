@@ -1,0 +1,36 @@
+projects:
+  commons-cli:
+    giturl: https://github.com/apache/commons-cli.git
+    build: mvn install -Drat.skip=true
+    clean: mvn clean
+
+    #  jblas:
+    #giturl: https://github.com/opprop-benchmarks/jblas.git
+    #build: mvn install
+    #clean: mvn clean
+
+#  exp4j:
+#    giturl: https://github.com/opprop-benchmarks/exp4j.git
+#    build: mvn install
+#    clean: mvn clean
+
+
+    #  react:
+    #giturl: https://github.com/flow/react.git
+    #git-ref: e8f7ee5ec666d2d1783c8a16b9cbd49bc11f037c
+    #build: mvn compile
+    #clean: mvn clean
+
+
+    #  Facer:
+    #giturl: https://github.com/bharathk005/Facer.git
+    #git-ref: 6ce45ce52310fc820173a12b72b29261acdf3181
+    #build: ant
+    #clean: ant clean
+
+
+#  jump:
+#    giturl: https://github.com/aas-integration/jump.git
+#    git-ref: e05cac7b1b584a493978d6861cbc7fa762816f34
+#    build: ant jar
+#    clean: ant clean
