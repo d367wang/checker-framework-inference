@@ -1,5 +1,6 @@
 package dummy.purity.utils;
 
+import checkers.inference.VariableAnnotator;
 import checkers.inference.model.AnnotationLocation;
 import checkers.inference.util.ASTPathUtil;
 import com.sun.source.tree.MethodTree;
@@ -53,8 +54,7 @@ public class MethodSlot {
 
 
   public static MethodSlot create(AnnotatedTypeFactory typeFactory, MethodTree node, AnnotationMirror anno) {
-    ASTRecord record = ASTPathUtil.getASTRecordForNode(typeFactory, node);
-    AnnotationLocation location = new AnnotationLocation.AstPathLocation(record);
+    AnnotationLocation location = VariableAnnotator.treeToLocation(typeFactory, node.getReturnType());
     return new MethodSlot(generateMethodId(node), anno, location);
         
   }

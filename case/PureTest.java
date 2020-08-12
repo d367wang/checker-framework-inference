@@ -5,12 +5,10 @@
 public class PureTest {
 	int field;
 
-	//@Pure
 	void foo() {
-		//field = 0;
+		field = 0;
 	}
 	
-	//@Deterministic 
 	int bar(int x, int y) {
 		foo();
 		return x+y;

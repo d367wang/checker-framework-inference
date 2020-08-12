@@ -175,6 +175,8 @@ public class PurityInferenceController {
         //                }
                     
       }
+
+
       for (VariableSlot slot : varSlots) {
         if (slot.getLocation() != null && slot.isInsertable()
             && (solverResult == null || solverResult.containsSolutionForVariable(slot.getId()))) {
@@ -185,7 +187,6 @@ public class PurityInferenceController {
             AnnotationMirror result = solverResult.getSolutionForVariable(slot.getId());
             if (result != null) {
               values.put(slot.getLocation(), result.toString());
-                                      
             }
                                 
           } else {
