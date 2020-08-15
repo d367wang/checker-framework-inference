@@ -21,7 +21,7 @@ public class PureTest {
 
 	void m2(A a) {
 		A aa = new A();
-		aa.z = 0;
+	//	aa.z = 0;
 	}
 
 }

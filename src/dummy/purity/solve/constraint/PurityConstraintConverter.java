@@ -64,7 +64,9 @@ public class PurityConstraintConverter {
 
                 methodToVariableSlot.put(id, varSlot);
                 if (!equalTo.keySet().contains(id)) {
-                    constraintManager.addPreferenceConstraint(varSlot, pureSlot, 3);
+                    constraintManager.addPreferenceConstraint(varSlot, pureSlot, 5);
+                    constraintManager.addPreferenceConstraint(varSlot, sideEffectFreeSlot, 3);
+                    constraintManager.addPreferenceConstraint(varSlot, deterministicSlot, 3);
                 }
             }
         }

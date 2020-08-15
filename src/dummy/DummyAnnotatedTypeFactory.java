@@ -10,7 +10,10 @@ import dummy.purity.qual.SideEffectFree;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
+
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -132,11 +135,8 @@ public class DummyAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
 
   public final Set<Class<? extends Annotation>> getPurityTypeQualifiers() {
-      Set<Class<? extends Annotation>> qualSet =
-                getBundledTypeQualifiers(
-                    Pure.class,
-                    Impure.class
-      );
+      Set<Class<? extends Annotation>> qualSet = new HashSet<>(
+          Arrays.asList(Pure.class, SideEffectFree.class, Deterministic.class, Impure.class));
       return qualSet;
   }
 }

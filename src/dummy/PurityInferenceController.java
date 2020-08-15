@@ -115,16 +115,18 @@ public class PurityInferenceController {
                 this.getMethodSlotManager());
         converter.convert();
 
-        //QualifierHierarchy qualifierHierarchy = getDummyTypeFactory().createPurityQualifierHierarchy();
-        //System.out.println(qualifierHierarchy.toString());
-        
-
         Lattice lattice = new PurityLatticeBuilder(dummyTypeFactory).buildLattice(slotManagerForMethod.getSlots());
+
+        /*
+        System.out.println("--------------LATTICE--------------------");
+        System.out.println(lattice.toString());
+        System.out.println("-----------------------------------------");
+        
         
         for(Constraint c : constraintManagerForMethod.getConstraints()) {
           System.out.println(c);
-                  
         }
+        */
 
         System.out.println("Start solving..........");
 

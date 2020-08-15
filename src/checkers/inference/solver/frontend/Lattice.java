@@ -93,4 +93,48 @@ public class Lattice {
         return underlyingQualifierHierarchy.isSubtype(a1, a2);
 
     }
+
+    @Override
+    public String toString() {
+        System.out.println("1. all annotations");
+        StringBuffer sb1 = new StringBuffer();
+        for (AnnotationMirror am : allAnnotations) {
+            sb1.append(am);
+            sb1.append("   ");
+        }
+        System.out.println(sb1.toString());
+
+        System.out.println("2. all types");
+        StringBuffer sb2 = new StringBuffer();
+        for (AnnotationMirror am : allTypes) {
+            sb2.append(am);
+            sb2.append("   ");
+        }
+        System.out.println(sb2.toString());
+
+        System.out.println("3. subtype");
+        StringBuffer sb3 = new StringBuffer();
+        for (AnnotationMirror k : subType.keySet()) {
+            sb3.append(k + ":\n");
+            for (AnnotationMirror a : subType.get(k)) {
+                sb3.append(a);
+                sb3.append("   ");
+            }
+            sb3.append("\n");
+        }
+        System.out.println(sb3.toString());
+
+        System.out.println("4. supertype");
+        StringBuffer sb4 = new StringBuffer();
+        for (AnnotationMirror k : superType.keySet()) {
+            sb4.append(k + ":\n");
+            for (AnnotationMirror a : superType.get(k)) {
+                sb4.append(a);
+                sb4.append("   ");
+            }
+            sb4.append("\n");
+        }
+        System.out.println(sb4.toString());
+        return super.toString();
+    }
 }
