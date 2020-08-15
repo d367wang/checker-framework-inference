@@ -3,14 +3,13 @@ package dummy;
 import checkers.inference.*;
 import checkers.inference.model.ConstraintManager;
 import com.sun.source.util.TreePath;
-import dummy.purity.PurityAnnotatedTypeFactory;
+
 import dummy.purity.qual.Impure;
 import dummy.purity.qual.Pure;
 import dummy.purity.solve.constraint.PurityConstraintConverter;
 import dummy.purity.solve.solver.PuritySolverEngine;
 import dummy.purity.utils.MethodSlotManager;
-import dummy.qual.DummyBottom;
-import dummy.qual.DummyTop;
+import dummy.qual.DummyAnno;
 
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;

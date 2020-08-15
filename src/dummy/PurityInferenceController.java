@@ -10,13 +10,12 @@ import checkers.inference.qual.VarAnnot;
 
 import checkers.inference.solver.frontend.LatticeBuilder;
 import checkers.inference.solver.frontend.Lattice;
-import checkers.inference.solver.frontend.TwoQualifiersLattice;
 
 import checkers.inference.util.JaifBuilder;
 
-import dummy.purity.PurityAnnotatedTypeFactory;
 import dummy.purity.SlotManagerForMethod;
 import dummy.purity.solve.constraint.PurityConstraintConverter;
+import dummy.purity.solve.PurityLatticeBuilder;
 import dummy.purity.solve.solver.PuritySolverEngine;
 import dummy.purity.utils.MethodSlotManager;
 
@@ -119,8 +118,9 @@ public class PurityInferenceController {
         //QualifierHierarchy qualifierHierarchy = getDummyTypeFactory().createPurityQualifierHierarchy();
         //System.out.println(qualifierHierarchy.toString());
         
-        TwoQualifiersLattice lattice = new LatticeBuilder().buildTwoTypeLattice(methodSlotManager.PURE,
-                                                                                methodSlotManager.IMPURE);
+
+        Lattice lattice = new PurityLatticeBuilder(dummyTypeFactory).buildLattice(slotManagerForMethod.getSlots());
+        
         for(Constraint c : constraintManagerForMethod.getConstraints()) {
           System.out.println(c);
                   

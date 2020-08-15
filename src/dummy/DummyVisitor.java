@@ -3,15 +3,21 @@ package dummy;
 import com.sun.source.tree.*;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
 
-import dummy.purity.PurityChecker;
 import dummy.purity.qual.Impure;
-import dummy.purity.qual.Pure;
 import dummy.purity.utils.MethodSlot;
 import dummy.purity.utils.MethodSlotManager;
 
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.common.basetype.BaseTypeVisitor;
+
+import org.checkerframework.dataflow.qual.Deterministic;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Pure.Kind;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.util.PurityUtils;
+
+import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.TreeUtils;
 
@@ -22,7 +28,9 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.Elements;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedTypeFactory>  {
 
@@ -117,13 +125,39 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
             currentMethodSlot.getId(),
             MethodSlot.generateMethodId(methodElem));
 
-        AnnotationMirror anno = atypeFactory.getDeclAnnotation(methodElem, Impure.class);
-        System.out.println(methodElem.getSimpleName() + "has annotation " + anno + "\n");
-        if (anno != null) {
-            methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
-                                                    methodSlotManager.getImpureSlot().getId());
-            System.out.println(currentMethodSlot.getId() +  "is impure");
+        //Set<AnnotationMirror> annotations = atypeFactory.stubTypes.getDeclAnnotation(methodElem);
+        Set<AnnotationMirror> annos =  atypeFactory.getDeclAnnotations(methodElem);
+        System.out.println("method " + methodElem.getSimpleName() + " from byte code:");
+        System.out.println("get annotations from element:");
+        for (AnnotationMirror a : annos) {
+            System.out.println(a);
         }
+
+        if(atypeFactory.isFromByteCode(methodElem)) {
+            if (!PurityUtils.hasPurityAnnotation(atypeFactory, methodElem)) {
+                methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
+                                                    methodSlotManager.getImpureSlot().getId());
+                System.out.println(currentMethodSlot.getId() +  "is impure");
+            } else {
+                EnumSet<Pure.Kind> purityKinds = PurityUtils.getPurityKinds(atypeFactory, methodElem);
+                              
+                if(purityKinds.contains(Kind.SIDE_EFFECT_FREE) &&
+                      purityKinds.contains(Kind.DETERMINISTIC)) {
+                    methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
+                                                      methodSlotManager.getPureSlot().getId());
+                              
+                } else if (purityKinds.contains(Kind.SIDE_EFFECT_FREE) &&
+                       !purityKinds.contains(Kind.DETERMINISTIC)) {
+                methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
+                                                      methodSlotManager.getSideEffectFreeSlot().getId());
+                } else if (!purityKinds.contains(Kind.SIDE_EFFECT_FREE) &&
+                       purityKinds.contains(Kind.DETERMINISTIC)) {
+                methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
+                                                      methodSlotManager.getDeterministicSlot().getId());
+                }
+            } 
+        }
+        
         return super.visitMethodInvocation(node, p);
     }
 }

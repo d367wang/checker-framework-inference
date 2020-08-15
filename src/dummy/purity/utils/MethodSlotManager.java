@@ -11,8 +11,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import dummy.purity.qual.Deterministic;
 import dummy.purity.qual.Impure;
 import dummy.purity.qual.Pure;
+import dummy.purity.qual.SideEffectFree;
+
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
 
@@ -21,9 +24,12 @@ public class MethodSlotManager {
 
     AnnotatedTypeFactory atypeFactory;
     public final AnnotationMirror PURE, IMPURE, VARANNO;
+    public final AnnotationMirror SIDE_EFFECT_FREE, DETERMINISTIC;
 
     private final MethodSlot PURE_METHOD_SLOT;
     private final MethodSlot IMPURE_METHOD_SLOT;
+    private final MethodSlot SIDE_EFFECT_FREE_METHOD_SLOT;
+    private final MethodSlot DETERMINISTIC_METHOD_SLOT;
 
     private Set<String> methodIds;
     private Map<String, MethodSlot> idToMethodSlots;
@@ -37,10 +43,14 @@ public class MethodSlotManager {
         final Elements elements = atypeFactory.getProcessingEnv().getElementUtils();
         PURE = AnnotationBuilder.fromClass(elements, Pure.class);
         IMPURE = AnnotationBuilder.fromClass(elements, Impure.class);
+        SIDE_EFFECT_FREE = AnnotationBuilder.fromClass(elements, SideEffectFree.class);
+        DETERMINISTIC = AnnotationBuilder.fromClass(elements, Deterministic.class);
         VARANNO = AnnotationBuilder.fromClass(elements, VarAnnot.class);
 
         PURE_METHOD_SLOT = new ConstMethodSlot("pure", PURE);
         IMPURE_METHOD_SLOT = new ConstMethodSlot("impure", IMPURE);
+        SIDE_EFFECT_FREE_METHOD_SLOT = new ConstMethodSlot("side_effect_free", SIDE_EFFECT_FREE);
+        DETERMINISTIC_METHOD_SLOT = new ConstMethodSlot("deterministic", DETERMINISTIC);
 
         idToMethodSlots = new HashMap<>();
         methodIds = new HashSet<>();
@@ -49,8 +59,13 @@ public class MethodSlotManager {
 
         methodIds.add("pure");
         methodIds.add("impure");
+        methodIds.add("side_effect_free");
+        methodIds.add("deterministic");
+        
         idToMethodSlots.put("pure", PURE_METHOD_SLOT);
         idToMethodSlots.put("impure", IMPURE_METHOD_SLOT);
+        idToMethodSlots.put("side_effect_free", SIDE_EFFECT_FREE_METHOD_SLOT);
+        idToMethodSlots.put("deterministic", DETERMINISTIC_METHOD_SLOT);
     }
 
     public MethodSlot getPureSlot() {
@@ -61,6 +76,15 @@ public class MethodSlotManager {
         return IMPURE_METHOD_SLOT;
     }
 
+  public MethodSlot getSideEffectFreeSlot() {
+    return SIDE_EFFECT_FREE_METHOD_SLOT;
+        
+  }
+
+  public MethodSlot getDeterministicSlot() {
+    return DETERMINISTIC_METHOD_SLOT;
+        
+  }
 
     public Map<String, MethodSlot> getIdToMethodSlots() {
         return idToMethodSlots;

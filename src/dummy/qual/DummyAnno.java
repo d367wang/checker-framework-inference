@@ -15,5 +15,5 @@ import java.lang.annotation.Target;
 @Target({ ElementType.TYPE_USE })
 @TargetLocations({ TypeUseLocation.EXPLICIT_UPPER_BOUND })
 
-public @interface DummyTop {
+public @interface DummyAnno {
 }

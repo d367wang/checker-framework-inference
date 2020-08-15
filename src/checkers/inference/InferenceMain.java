@@ -166,6 +166,7 @@ public class InferenceMain {
                 "-Xmaxwarns", "1000",
                 "-Xmaxerrs", "1000",
                 "-XDignore.symbol.file",
+                "-AstubDebug",
                 "-Awarns"));
 
         if (SystemUtil.getJreVersion() == 8) {

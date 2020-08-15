@@ -1,9 +1,11 @@
 package dummy;
 
-import dummy.qual.DummyBottom;
-import dummy.qual.DummyTop;
+import dummy.qual.DummyAnno;
+
 import dummy.purity.qual.Impure;
 import dummy.purity.qual.Pure;
+import dummy.purity.qual.Deterministic;
+import dummy.purity.qual.SideEffectFree;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.type.TypeMirror;
@@ -15,15 +17,15 @@ import java.util.Set;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.type.QualifierHierarchy;
-import org.checkerframework.framework.util.GraphQualifierHierarchy;
+import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
-
+import org.checkerframework.javacutil.AnnotationUtils;
 
 public class DummyAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
-    protected final AnnotationMirror DUMMYBOTTOM, DUMMYTOP;
-    protected final AnnotationMirror IMPURE;
+    protected final AnnotationMirror DUMMYANNO;
+    protected final AnnotationMirror IMPURE, PURE;
   
     /**
      * For each Java type is present in the target program, typeNamesMap maps
@@ -33,8 +35,8 @@ public class DummyAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     public DummyAnnotatedTypeFactory(BaseTypeChecker checker) {
         super(checker);
-        DUMMYTOP = AnnotationBuilder.fromClass(elements, DummyTop.class);
-        DUMMYBOTTOM = AnnotationBuilder.fromClass(elements, DummyBottom.class);
+        DUMMYANNO= AnnotationBuilder.fromClass(elements, DummyAnno.class); 
+        PURE = AnnotationBuilder.fromClass(elements, Pure.class);
         IMPURE = AnnotationBuilder.fromClass(elements, Impure.class);
         
         postInit();
@@ -47,28 +49,86 @@ public class DummyAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     @Override
     public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
-        return new DummyQualifierHierarchy(factory, DUMMYBOTTOM);
+        return new DummyQualifierHierarchy(factory);
     }
 
-    private final class DummyQualifierHierarchy extends GraphQualifierHierarchy {
+    public final class DummyQualifierHierarchy extends MultiGraphQualifierHierarchy {
 
-        public DummyQualifierHierarchy(MultiGraphFactory f, AnnotationMirror bottom) {
-            super(f, bottom);
+        public DummyQualifierHierarchy(MultiGraphFactory f) {
+            super(f);
+        }
+
+      /*
+        @Override
+        public boolean isSubtype(AnnotationMirror subAnno, AnnotationMirror superAnno) {
+          if (AnnotationUtils.areSame(subAnno, superAnno)) {
+            return true;
+                        
+          }
+
+          if (AnnotationUtils.areSameByClass(subAnno, Pure.class)) {
+            return false;
+                        
+          } else if (AnnotationUtils.areSameByClass(subAnno, SideEffectFree.class) ||
+                     AnnotationUtils.areSameByClass(subAnno, Deterministic.class)) {
+            return AnnotationUtils.areSameByClass(superAnno, Pure.class);
+                        
+          } else if (AnnotationUtils.areSameByClass(subAnno, Impure.class)) {
+            return AnnotationUtils.areSameByClass(superAnno, Pure.class) ||
+                AnnotationUtils.areSameByClass(superAnno, SideEffectFree.class) ||
+                AnnotationUtils.areSameByClass(superAnno, Deterministic.class);
+                        
+          } else {
+            return super.isSubtype(subAnno, superAnno);
+                        
+          }
+                  
+          } */
+
+
+                @Override
+                public boolean isSubtype(AnnotationMirror subAnno, AnnotationMirror superAnno) {
+                  boolean res;
+                  if (AnnotationUtils.areSame(subAnno, superAnno)) {
+                    res = true;
+
+                                
+                  } else {
+                    if (AnnotationUtils.areSameByClass(subAnno, Pure.class)) {
+                      res = false;
+
+                                      
+                    } else if (AnnotationUtils.areSameByClass(subAnno, SideEffectFree.class) ||
+                               AnnotationUtils.areSameByClass(subAnno, Deterministic.class)) {
+                      res = AnnotationUtils.areSameByClass(superAnno, Pure.class);
+
+                                      
+                    } else if (AnnotationUtils.areSameByClass(subAnno, Impure.class)) {
+                      res = AnnotationUtils.areSameByClass(superAnno, Pure.class) ||
+                            AnnotationUtils.areSameByClass(superAnno, SideEffectFree.class) ||
+                            AnnotationUtils.areSameByClass(superAnno, Deterministic.class);
+
+                                      
+                    } else {
+                      res = false;
+                                      
+                    }
+                                
+                  }
+                  return res;
+                          
+                }
+
+
+        public AnnotationMirror getPurityTop() {
+          return PURE;
+        }
+
+        public AnnotationMirror getPurityBottom() {
+          return IMPURE;
+                
         }
     }
-
-
-  public QualifierHierarchy createPurityQualifierHierarchy() {
-    /*
-            Set<Class<? extends Annotation>> qualSet =
-                getBundledTypeQualifiers(
-                    Pure.class,
-                    Impure.class);
-            return createQualifierHierarchy(this.elements, qualSet, createQualifierHierarchyFactory());
-    */
-    return new GraphQualifierHierarchy(createQualifierHierarchyFactory(), IMPURE);
-    
-  }
 
 
   public final Set<Class<? extends Annotation>> getPurityTypeQualifiers() {
@@ -78,6 +138,5 @@ public class DummyAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                     Impure.class
       );
       return qualSet;
-                
   }
 }

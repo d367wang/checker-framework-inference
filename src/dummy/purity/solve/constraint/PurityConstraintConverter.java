@@ -47,8 +47,13 @@ public class PurityConstraintConverter {
         // create variable slot for all methods
         ConstantSlot pureSlot = (ConstantSlot) convertToVariableSlot(methodSlotManager.getPureSlot());
         ConstantSlot impureSlot = (ConstantSlot) convertToVariableSlot(methodSlotManager.getImpureSlot());
+        ConstantSlot sideEffectFreeSlot = (ConstantSlot) convertToVariableSlot(methodSlotManager.getSideEffectFreeSlot());
+        ConstantSlot deterministicSlot = (ConstantSlot) convertToVariableSlot(methodSlotManager.getDeterministicSlot());
+        
         methodToVariableSlot.put(methodSlotManager.getPureSlot().getId(), pureSlot);
         methodToVariableSlot.put(methodSlotManager.getImpureSlot().getId(), impureSlot);
+        methodToVariableSlot.put(methodSlotManager.getSideEffectFreeSlot().getId(), sideEffectFreeSlot);
+        methodToVariableSlot.put(methodSlotManager.getDeterministicSlot().getId(), deterministicSlot);
 
         for (Map.Entry<String, MethodSlot> entry : idToMethodSlots.entrySet()) {
             String id = entry.getKey();
