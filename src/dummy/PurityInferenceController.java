@@ -145,7 +145,7 @@ public class PurityInferenceController {
             e.printStackTrace();
         }
 
-        //writeJaif();
+        writeJaif();
 
         writeJson(idToVarSlot);
     }
