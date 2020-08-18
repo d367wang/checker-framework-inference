@@ -40,7 +40,7 @@ public class PurityConstraintConverter {
     }
 
 
-    public void convert() {
+    public Map<String, VariableSlot> convert() {
 
         Set<String> methodIds = idToMethodSlots.keySet();
       
@@ -96,6 +96,8 @@ public class PurityConstraintConverter {
                 }
             }
         }
+        return methodToVariableSlot;
+        
     }
 
   

@@ -67,7 +67,7 @@ public class MethodSlot {
 
   public static String generateMethodId(ExecutableElement elm) {
     TypeElement typeElement = ElementUtils.enclosingClass(elm);
-    return String.join(".", typeElement.getQualifiedName().toString(), elm.toString());
+    return String.join("::", typeElement.getQualifiedName().toString(), elm.toString());
         
   }
 

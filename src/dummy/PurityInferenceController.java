@@ -13,14 +13,16 @@ import checkers.inference.solver.frontend.Lattice;
 
 import checkers.inference.util.JaifBuilder;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import dummy.purity.SlotManagerForMethod;
 import dummy.purity.solve.constraint.PurityConstraintConverter;
 import dummy.purity.solve.PurityLatticeBuilder;
 import dummy.purity.solve.solver.PuritySolverEngine;
 import dummy.purity.utils.MethodSlotManager;
 
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 
 import java.lang.annotation.Annotation;
 
@@ -113,7 +115,8 @@ public class PurityInferenceController {
                 this.getSlotManagerForMethod(),
                 this.getConstraintManagerForMethod(),
                 this.getMethodSlotManager());
-        converter.convert();
+
+        Map<String, VariableSlot> idToVarSlot = converter.convert();
 
         Lattice lattice = new PurityLatticeBuilder(dummyTypeFactory).buildLattice(slotManagerForMethod.getSlots());
 
@@ -142,7 +145,9 @@ public class PurityInferenceController {
             e.printStackTrace();
         }
 
-        writeJaif();
+        //writeJaif();
+
+        writeJson(idToVarSlot);
     }
 
 
@@ -213,4 +218,63 @@ public class PurityInferenceController {
     }
         
   }
+
+
+  private void writeJson(Map<String, VariableSlot> idToVarSlot) {
+    Map<String, Map<String, String>> classToPurity = new HashMap<>();
+
+    if (solverResult != null) {
+      for (Map.Entry<String, VariableSlot> entry : idToVarSlot.entrySet()) {
+        String id = entry.getKey();
+        VariableSlot slot = entry.getValue();
+        if (slot.getLocation() != null && slot.isInsertable()
+            && solverResult.containsSolutionForVariable(slot.getId())) {
+          // TODO: String serialization of annotations.
+          // Not all VariableSlots will have an inferred value.
+          // This happens for VariableSlots that have no constraints.
+          AnnotationMirror result = solverResult.getSolutionForVariable(slot.getId());
+          if (result != null) {
+            String[] s = id.split("::");
+            String classname = s[0];
+            String methodname = s[1];
+            if (!classToPurity.containsKey(classname)) {
+              classToPurity.put(classname, new HashMap<>());
+                                      
+            }
+            classToPurity.get(classname).put(methodname, result.toString());
+            //values.put(id, result.toString());
+                                
+          }
+        }
+      }
+
+      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      try {
+        Writer writer = new FileWriter("output.json");
+        gson.toJson(classToPurity, writer);
+        writer.close();
+                   
+      } catch (IOException e) {
+        e.printStackTrace();
+                    
+      }
+    }
+  }
+
+  /*
+  private String simpleString(AnnotationMirror am) {
+    String qualifiedName = am.toString();
+      System.out.println(qualifiedName);
+    String[] s = qualifiedName.split(".");
+    System.out.println("split array size " + String.valueOf(s.length));
+    for(String e:s) {
+      System.out.println(e);
+    }
+    //String simpleName = "@" + s[s.length - 1];
+    //return simpleName;
+    return qualifiedName;
+        
+  }
+  */
+  
 }
