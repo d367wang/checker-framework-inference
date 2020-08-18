@@ -26,10 +26,10 @@ CORPUSFILE="working-benchmarks.yml"
 
 if [ -n "$1" ] && [ $1 = "travis" ]; then
     # Running Security on working benchmarks
-    python run-security-on-corpus.py --corpus-file $CORPUSFILE --is-travis-build true
+    python run-purity-on-corpus.py --corpus-file $CORPUSFILE --is-travis-build true
 else
     # Running Ontology on working benchmarks
-    python run-security-on-corpus.py --corpus-file $CORPUSFILE
+    python run-purity-on-corpus.py --corpus-file $CORPUSFILE
 fi
 
 # Grep experiment outputs
