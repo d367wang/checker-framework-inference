@@ -19,6 +19,7 @@ import org.checkerframework.dataflow.util.PurityUtils;
 
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.ElementUtils;
 import org.checkerframework.javacutil.TreeUtils;
 
 import checkers.inference.InferenceChecker;
@@ -139,7 +140,7 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
       }
 
 
-      if (atypeFactory.isFromByteCode(methodElem)) {
+      if (!ElementUtils.isElementFromSourceCode(methodElem)) {
         System.out.println("method " + methodElem.getSimpleName() + " from byte code:");
 
         if (!PurityUtils.hasPurityAnnotation(atypeFactory, methodElem)) {
@@ -165,14 +166,12 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
             System.out.println(currentMethodSlot.getId() + "<: deterministic");
                             
           }
-                      
         }
                 
       } else {
         methodSlotManager.addSubtypeOfConstraint(currentMethodSlot.getId(),
-                                                 methodSlotManager.getSideEffectFreeSlot().getId());
-        System.out.println(currentMethodSlot.getId() + "<: side_effect_free");
-                
+                                                 MethodSlot.generateMethodId(methodElem));
+        System.out.println(currentMethodSlot.getId() + "<: " + MethodSlot.generateMethodId(methodElem));
       }
 
       return super.visitMethodInvocation(node, p);

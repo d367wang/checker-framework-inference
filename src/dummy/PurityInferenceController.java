@@ -124,12 +124,12 @@ public class PurityInferenceController {
         System.out.println("--------------LATTICE--------------------");
         System.out.println(lattice.toString());
         System.out.println("-----------------------------------------");
+        */
         
         
         for(Constraint c : constraintManagerForMethod.getConstraints()) {
           System.out.println(c);
         }
-        */
 
         System.out.println("Start solving..........");
 
@@ -147,6 +147,7 @@ public class PurityInferenceController {
 
         writeJaif();
 
+        System.out.println("writing json .........");
         writeJson(idToVarSlot);
     }
 
@@ -222,7 +223,7 @@ public class PurityInferenceController {
 
   private void writeJson(Map<String, VariableSlot> idToVarSlot) {
     Map<String, Map<String, String>> classToPurity = new HashMap<>();
-
+    
     if (solverResult != null) {
       for (Map.Entry<String, VariableSlot> entry : idToVarSlot.entrySet()) {
         String id = entry.getKey();
@@ -239,7 +240,16 @@ public class PurityInferenceController {
             String methodname = s[1];
             if (!classToPurity.containsKey(classname)) {
               classToPurity.put(classname, new HashMap<>());
-                                      
+            }
+
+            // void method is not deterministic
+          if(methodSlotManager.getIdToMethodSlots().get(id).isVoid()) {
+              if (result.toString().equals("@dummy.purity.qual.Deterministic")) {
+                result = methodSlotManager.IMPURE;
+                                            
+              } else if (result.toString().equals("@dummy.purity.qual.Pure")) {
+                result = methodSlotManager.SIDE_EFFECT_FREE;
+              }
             }
             classToPurity.get(classname).put(methodname, result.toString());
             //values.put(id, result.toString());

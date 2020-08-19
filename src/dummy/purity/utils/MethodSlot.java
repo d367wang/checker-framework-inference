@@ -14,6 +14,8 @@ import scenelib.annotations.io.ASTRecord;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
+
 
 public class MethodSlot {
 //    private ExecutableElement methodElement;
@@ -26,8 +28,6 @@ public class MethodSlot {
     private AnnotationMirror anno;
 
     protected boolean isConstant = false;
-
-//    private SlotKind kind;
 
 
     public String getId() {
@@ -46,16 +46,17 @@ public class MethodSlot {
         return anno;
     }
 
-    protected MethodSlot(String id, AnnotationMirror anno, AnnotationLocation location) {
+    protected MethodSlot(String id, MethodTree node, AnnotationMirror anno, AnnotationLocation location) {
         this.location = location;
         this.anno = anno;
         this.id = id;
+        this.tree = node;
     }
 
 
   public static MethodSlot create(AnnotatedTypeFactory typeFactory, MethodTree node, AnnotationMirror anno) {
     AnnotationLocation location = VariableAnnotator.treeToLocation(typeFactory, node.getReturnType());
-    return new MethodSlot(generateMethodId(node), anno, location);
+    return new MethodSlot(generateMethodId(node), node, anno, location);
         
   }
 
@@ -71,23 +72,15 @@ public class MethodSlot {
         
   }
 
-//    public enum SlotKind {
-//        VARIABLE,
-//        CONSTANT,
-//    }
-//
-//    public void setKind(SlotKind k) { this.kind = k; }
-//    public SlotKind getKind() { return kind;}
-//
-//    public boolean isVariable() {
-//        return !isConstant();
-//    }
-//
-//    public boolean isConstant() {
-//        return getKind() == SlotKind.CONSTANT;
-//    }
 
     public boolean equals(MethodSlot other) {
         return this.tree == other.tree;
     }
+
+
+  public boolean isVoid() {
+    final ExecutableElement methodElem = TreeUtils.elementFromDeclaration(this.tree);
+    return methodElem.getReturnType().getKind() == TypeKind.VOID;
+        
+  }
 }
