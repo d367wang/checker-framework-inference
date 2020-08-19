@@ -60,25 +60,7 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
 
         System.out.println("\nvisiting method -------" + methodSlot.getId());
 
-        /*
-        AnnotationMirror anno = atypeFactory.getDeclAnnotation(methodElem, Pure.class);
-        if (anno != null) {
-          methodSlotManager.addEqualityConstraint(methodSlot.getId(),
-                                                  methodSlotManager.getPureSlot().getId());
-          System.out.println(methodSlot.getId() + " = pure");
-                  
-        }
-
-        anno = atypeFactory.getDeclAnnotation(methodElem, Impure.class);
-        if (anno != null) {
-          methodSlotManager.addEqualityConstraint(methodSlot.getId(),
-                                                  methodSlotManager.getImpureSlot().getId());
-          System.out.println(methodSlot.getId() + " = impure");
-                  
-        }
-        */
-        
-        
+       
         if (methodElem.getKind() == ElementKind.CONSTRUCTOR) {
             methodSlotManager.addEqualityConstraint(methodSlot.getId(),
                                                   methodSlotManager.getSideEffectFreeSlot().getId());
@@ -90,14 +72,7 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
               methodSlotManager.getSideEffectFreeSlot().getId());
                   
               }*/
-        /*else if (methodElem.getKind() == ElementKind.METHOD) {
-            
-        }
-        List<? extends AnnotationMirror> allAnnos = methodElem.getAnnotationMirrors();
-        System.out.println("annotations on method " + currentMethod);
-        System.out.println(allAnnos);
-        */
-
+        
 
         return super.visitMethod(node, p);
     }
@@ -142,57 +117,68 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
     }
 
 
+
     @Override
     public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
-        final ExecutableElement methodElem = TreeUtils.elementFromUse(node);
-        System.out.println("\n" + currentMethodSlot.getId() + " call " + methodElem.getSimpleName());
+      final ExecutableElement methodElem = TreeUtils.elementFromUse(node);
+      System.out.println("\n" + currentMethodSlot.getId() + " call " + methodElem.getSimpleName());
 
-        methodSlotManager.addSubtypeOfConstraint(
-            currentMethodSlot.getId(),
-            MethodSlot.generateMethodId(methodElem));
+      //        Set<AnnotationMirror> annos = atypeFactory.getDeclAnnotations(methodElem);
+      //        System.out.println("get annotations from element:");
+      //        for (AnnotationMirror a : annos) {
+      //            System.out.println(a);
+      //        }
 
-        //Set<AnnotationMirror> annotations = atypeFactory.stubTypes.getDeclAnnotation(methodElem);
-        Set<AnnotationMirror> annos =  atypeFactory.getDeclAnnotations(methodElem);
-        System.out.println("method " + methodElem.getSimpleName() + " from byte code:");
-        System.out.println("get annotations from element:");
-        for (AnnotationMirror a : annos) {
-            System.out.println(a);
-        }
+      if (methodElem.getKind() == ElementKind.CONSTRUCTOR) {
+        methodSlotManager.addSubtypeOfConstraint(currentMethodSlot.getId(),
+                                                 methodSlotManager.getSideEffectFreeSlot().getId());
+        System.out.println(currentMethodSlot.getId() + "<: side_effect_free");
 
-
-        if (atypeFactory.isFromByteCode(methodElem) && (methodElem.getKind() != ElementKind.CONSTRUCTOR)) {
-            if (!PurityUtils.hasPurityAnnotation(atypeFactory, methodElem)) {
-                methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
-                                                    methodSlotManager.getImpureSlot().getId());
-                System.out.println(currentMethodSlot.getId() +  "= impure");
-                
-            } else {
-                EnumSet<Pure.Kind> purityKinds = PurityUtils.getPurityKinds(atypeFactory, methodElem);
-                              
-                if(purityKinds.contains(Kind.SIDE_EFFECT_FREE) &&
-                      purityKinds.contains(Kind.DETERMINISTIC)) {
-                    methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
-                                                      methodSlotManager.getPureSlot().getId());
-                    System.out.println(currentMethodSlot.getId() +  "= pure");
-                              
-                } else if (purityKinds.contains(Kind.SIDE_EFFECT_FREE) &&
-                           !purityKinds.contains(Kind.DETERMINISTIC)) {
-                    methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
-                                                      methodSlotManager.getSideEffectFreeSlot().getId());
-                    System.out.println(currentMethodSlot.getId() +  "= side_effect_free");
-
-                } else if (!purityKinds.contains(Kind.SIDE_EFFECT_FREE) &&
-                           purityKinds.contains(Kind.DETERMINISTIC)) {
-                    methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
-                                                      methodSlotManager.getDeterministicSlot().getId());
-                    System.out.println(currentMethodSlot.getId() +  "= deterministic");
-
-                }
-            } 
-        }
-        
         return super.visitMethodInvocation(node, p);
+                
+      }
+
+
+      if (atypeFactory.isFromByteCode(methodElem)) {
+        System.out.println("method " + methodElem.getSimpleName() + " from byte code:");
+
+        if (!PurityUtils.hasPurityAnnotation(atypeFactory, methodElem)) {
+          methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
+                                                  methodSlotManager.getImpureSlot().getId());
+          System.out.println(currentMethodSlot.getId() + "= impure");
+
+                      
+        } else {
+          EnumSet<Pure.Kind> purityKinds = PurityUtils.getPurityKinds(atypeFactory, methodElem);
+
+          if (purityKinds.contains(Kind.SIDE_EFFECT_FREE) &&
+              !purityKinds.contains(Kind.DETERMINISTIC)) {
+            methodSlotManager.addSubtypeOfConstraint(currentMethodSlot.getId(),
+                                                     methodSlotManager.getSideEffectFreeSlot().getId());
+            System.out.println(currentMethodSlot.getId() + "<: side_effect_free");
+
+                            
+          } else if (!purityKinds.contains(Kind.SIDE_EFFECT_FREE) &&
+                     purityKinds.contains(Kind.DETERMINISTIC)) {
+            methodSlotManager.addSubtypeOfConstraint(currentMethodSlot.getId(),
+                                                     methodSlotManager.getDeterministicSlot().getId());
+            System.out.println(currentMethodSlot.getId() + "<: deterministic");
+                            
+          }
+                      
+        }
+                
+      } else {
+        methodSlotManager.addSubtypeOfConstraint(currentMethodSlot.getId(),
+                                                 methodSlotManager.getSideEffectFreeSlot().getId());
+        System.out.println(currentMethodSlot.getId() + "<: side_effect_free");
+                
+      }
+
+      return super.visitMethodInvocation(node, p);
+          
     }
+
 
 
     @Override
