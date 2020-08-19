@@ -66,12 +66,11 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
                                                   methodSlotManager.getSideEffectFreeSlot().getId());
             System.out.println(methodSlot.getId() + " = side-effect-free");
             
-        } /*else if (methodElem.getReturnType().getKind() == TypeKind.VOID) {
-          methodSlotManager.addSubtypeOfConstraint(
-              currentMethodSlot.getId(),
-              methodSlotManager.getSideEffectFreeSlot().getId());
-                  
-              }*/
+        } else if (methodElem.getReturnType().getKind() == TypeKind.VOID) {
+            methodSlotManager.addSubtypeOfConstraint(
+                methodSlotManager.getDeterministicSlot().getId(),
+                methodSlot.getId());
+        }
         
 
         return super.visitMethod(node, p);
@@ -169,10 +168,11 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
         }
                 
       } else {
-        methodSlotManager.addSubtypeOfConstraint(currentMethodSlot.getId(),
-                                                 methodSlotManager.getSideEffectFreeSlot().getId());
-        System.out.println(currentMethodSlot.getId() + "<: side_effect_free");
-                
+          methodSlotManager.addSubtypeOfConstraint(
+              currentMethodSlot.getId(),
+              MethodSlot.generateMethodId(methodElem));
+
+          System.out.println(currentMethodSlot.getId() + " <: " + MethodSlot.generateMethodId(methodElem));
       }
 
       return super.visitMethodInvocation(node, p);
@@ -245,7 +245,8 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
       }
       */
 
-      if (!deterministic) {
+      //if (!deterministic) {
+      if (!deterministic && (currentMethodElem.getReturnType().getKind() != TypeKind.VOID)) {
         methodSlotManager.addSubtypeOfConstraint(
             currentMethodSlot.getId(),
             methodSlotManager.getSideEffectFreeSlot().getId());
