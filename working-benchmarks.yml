@@ -1,8 +1,13 @@
 projects:
   commons-cli:
-    giturl: https://github.com/apache/commons-cli.git
+    giturl: https://github.com/d367wang/commons-cli.git
     build: mvn install -Drat.skip=true
     clean: mvn clean
+
+    #commons-cli:
+    #giturl: https://github.com/apache/commons-cli.git
+    #build: mvn install -Drat.skip=true
+    #clean: mvn clean
 
     #  jblas:
     #giturl: https://github.com/opprop-benchmarks/jblas.git
