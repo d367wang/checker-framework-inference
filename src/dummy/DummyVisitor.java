@@ -61,13 +61,14 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
 
         System.out.println("\nvisiting method -------" + methodSlot.getId());
 
-       
+        
         if (methodElem.getKind() == ElementKind.CONSTRUCTOR) {
-            methodSlotManager.addEqualityConstraint(methodSlot.getId(),
+            methodSlotManager.addSubtypeOfConstraint(methodSlot.getId(),
                                                   methodSlotManager.getSideEffectFreeSlot().getId());
-            System.out.println(methodSlot.getId() + " = side-effect-free");
+            System.out.println(methodSlot.getId() + " <: side-effect-free");
             
-        } /*else if (methodElem.getReturnType().getKind() == TypeKind.VOID) {
+        }
+        /* else if (methodElem.getReturnType().getKind() == TypeKind.VOID) {
           methodSlotManager.addSubtypeOfConstraint(
               currentMethodSlot.getId(),
               methodSlotManager.getSideEffectFreeSlot().getId());

@@ -12,6 +12,7 @@ import org.checkerframework.javacutil.ElementUtils;
 import scenelib.annotations.io.ASTRecord;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
@@ -81,6 +82,13 @@ public class MethodSlot {
   public boolean isVoid() {
     final ExecutableElement methodElem = TreeUtils.elementFromDeclaration(this.tree);
     return methodElem.getReturnType().getKind() == TypeKind.VOID;
+        
+  }
+
+
+  public boolean isConstructor() {
+    final ExecutableElement methodElem = TreeUtils.elementFromDeclaration(this.tree);
+    return methodElem.getKind() == ElementKind.CONSTRUCTOR;
         
   }
 }

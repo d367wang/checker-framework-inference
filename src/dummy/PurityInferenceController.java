@@ -250,7 +250,12 @@ public class PurityInferenceController {
               } else if (result.toString().equals("@dummy.purity.qual.Pure")) {
                 result = methodSlotManager.SIDE_EFFECT_FREE;
               }
-            }
+          }
+
+          if (methodSlotManager.getIdToMethodSlots().get(id).isConstructor()) {
+            result = methodSlotManager.SIDE_EFFECT_FREE;
+                                    
+          }
             classToPurity.get(classname).put(methodname, result.toString());
             //values.put(id, result.toString());
                                 
