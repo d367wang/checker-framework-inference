@@ -28,6 +28,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.Elements;
 import java.util.EnumSet;
 import java.util.List;
@@ -56,6 +57,7 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
 
         System.out.println("\nvisiting method -------" + methodSlot.getId());
 
+        /*
         AnnotationMirror anno = atypeFactory.getDeclAnnotation(methodElem, Pure.class);
         if (anno != null) {
           methodSlotManager.addEqualityConstraint(methodSlot.getId(),
@@ -71,11 +73,21 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
           System.out.println(methodSlot.getId() + " = impure");
                   
         }
+        */
         
-        /*
+        
         if (methodElem.getKind() == ElementKind.CONSTRUCTOR) {
-
-        } else if (methodElem.getKind() == ElementKind.METHOD) {
+            methodSlotManager.addEqualityConstraint(methodSlot.getId(),
+                                                  methodSlotManager.getSideEffectFreeSlot().getId());
+            System.out.println(methodSlot.getId() + " = side-effect-free");
+            
+        } /*else if (methodElem.getReturnType().getKind() == TypeKind.VOID) {
+          methodSlotManager.addSubtypeOfConstraint(
+              currentMethodSlot.getId(),
+              methodSlotManager.getSideEffectFreeSlot().getId());
+                  
+              }*/
+        /*else if (methodElem.getKind() == ElementKind.METHOD) {
             
         }
         List<? extends AnnotationMirror> allAnnos = methodElem.getAnnotationMirrors();
@@ -139,7 +151,8 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
             System.out.println(a);
         }
 
-        if(atypeFactory.isFromByteCode(methodElem)) {
+
+        if (atypeFactory.isFromByteCode(methodElem) && (methodElem.getKind() != ElementKind.CONSTRUCTOR)) {
             if (!PurityUtils.hasPurityAnnotation(atypeFactory, methodElem)) {
                 methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
                                                     methodSlotManager.getImpureSlot().getId());
@@ -217,6 +230,7 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
       // This does not use "addNotBothReason" because the reasons are different:  one is
       // because the constructor is called at all, and the other is because the constuctor
       // is not side-effect-free.
+      /*
       if (!deterministic && !sideEffectFree) {
         methodSlotManager.addEqualityConstraint(currentMethodSlot.getId(),
                                                 methodSlotManager.getImpureSlot().getId());
@@ -234,6 +248,13 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
             currentMethodSlot.getId(),
             methodSlotManager.getDeterministicSlot().getId());
                 
+      }
+      */
+
+      if (!deterministic) {
+        methodSlotManager.addSubtypeOfConstraint(
+            currentMethodSlot.getId(),
+            methodSlotManager.getSideEffectFreeSlot().getId());
       }
 
       // TODO: if okThrowDeterministic, permit arguments to the newClass to be
