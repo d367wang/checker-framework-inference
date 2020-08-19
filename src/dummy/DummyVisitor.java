@@ -65,6 +65,7 @@ public class DummyVisitor extends InferenceVisitor<DummyChecker, BaseAnnotatedTy
             methodSlotManager.addEqualityConstraint(methodSlot.getId(),
                     methodSlotManager.getSideEffectFreeSlot().getId());
             System.out.println(methodSlot.getId() + " = side-effect-free");
+            return null;
 
         } else if (methodElem.getReturnType().getKind() == TypeKind.VOID) {
             methodSlotManager.addSubtypeOfConstraint(
@@ -142,7 +143,8 @@ public class DummyVisitor extends InferenceVisitor<DummyChecker, BaseAnnotatedTy
             System.out.println("method " + methodElem.getSimpleName() + " from byte code:");
 
             if (!PurityUtils.hasPurityAnnotation(atypeFactory, methodElem)) {
-                if (currentMethodElem.getReturnType().getKind() == TypeKind.VOID) {
+                if ((methodElem.getReturnType().getKind() == TypeKind.VOID)
+                    || (currentMethodElem.getReturnType().getKind() == TypeKind.VOID)) {
                     methodSlotManager.addSubtypeOfConstraint(currentMethodSlot.getId(),
                             methodSlotManager.getDeterministicSlot().getId());
                     System.out.println(currentMethodSlot.getId() + "<: deterministic");
@@ -157,11 +159,13 @@ public class DummyVisitor extends InferenceVisitor<DummyChecker, BaseAnnotatedTy
                 EnumSet<Pure.Kind> purityKinds = PurityUtils.getPurityKinds(atypeFactory, methodElem);
 
                 if (purityKinds.contains(Kind.SIDE_EFFECT_FREE) &&
-                        !purityKinds.contains(Kind.DETERMINISTIC) &&
-                        (currentMethodElem.getReturnType().getKind() != TypeKind.VOID)) {
+                        !purityKinds.contains(Kind.DETERMINISTIC)) {
+                  if ((methodElem.getReturnType().getKind() != TypeKind.VOID)
+                              && (currentMethodElem.getReturnType().getKind() != TypeKind.VOID)) {
                     methodSlotManager.addSubtypeOfConstraint(currentMethodSlot.getId(),
                             methodSlotManager.getSideEffectFreeSlot().getId());
                     System.out.println(currentMethodSlot.getId() + "<: side_effect_free");
+                  }
 
                 } else if (!purityKinds.contains(Kind.SIDE_EFFECT_FREE) &&
                         purityKinds.contains(Kind.DETERMINISTIC)) {
