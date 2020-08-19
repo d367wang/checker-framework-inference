@@ -37,6 +37,8 @@ import java.util.Set;
 public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedTypeFactory>  {
 
     private MethodSlot currentMethodSlot;
+    private ExecutableElement currentMethodElem;
+  
     private MethodSlotManager methodSlotManager;
 
     public DummyVisitor(DummyChecker checker, InferenceChecker ichecker,
@@ -51,6 +53,7 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
     @Override
     public Void visitMethod(MethodTree node, Void p) {
         final ExecutableElement methodElem = TreeUtils.elementFromDeclaration(node);
+        currentMethodElem = methodElem;
 
         MethodSlot methodSlot = methodSlotManager.addNewMethodSlot(atypeFactory, node);
         currentMethodSlot = methodSlot;
@@ -102,6 +105,11 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
 
     @Override
     public Void visitAssignment(AssignmentTree node, Void p) {
+
+        if (currentMethodElem.getKind() == ElementKind.CONSTRUCTOR) {
+            return super.visitAssignment(node, p);
+        }
+      
         ExpressionTree variable = node.getVariable();
 
         // lhs is a field access
