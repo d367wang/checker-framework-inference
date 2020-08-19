@@ -19,6 +19,7 @@ import org.checkerframework.dataflow.util.PurityUtils;
 
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.ElementUtils;
 import org.checkerframework.javacutil.TreeUtils;
 
 import checkers.inference.InferenceChecker;
@@ -138,7 +139,8 @@ public class DummyVisitor  extends InferenceVisitor<DummyChecker, BaseAnnotatedT
       }
 
 
-      if (atypeFactory.isFromByteCode(methodElem)) {
+      //if (atypeFactory.isFromByteCode(methodElem)) {
+      if (!ElementUtils.isElementFromSourceCode(methodElem)) {
         System.out.println("method " + methodElem.getSimpleName() + " from byte code:");
 
         if (!PurityUtils.hasPurityAnnotation(atypeFactory, methodElem)) {
