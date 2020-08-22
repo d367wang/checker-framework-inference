@@ -71,8 +71,8 @@ public class FenumInferenceTreeAnnotator extends InferenceTreeAnnotator {
 
       @Override
       public Void visitIdentifier(IdentifierTree node, AnnotatedTypeMirror identifierType) {
-        System.out.println("\nfenum inference tree annotator is visiting identifier: " + node.getName().toString());
-            System.out.println("identifier tree type is " + identifierType.getClass().getSimpleName() + "\n");
+        //System.out.println("\nfenum inference tree annotator is visiting identifier: " + node.getName().toString());
+        //System.out.println("identifier tree type is " + identifierType.getClass().getSimpleName() + "\n");
         return super.visitIdentifier(node, identifierType);
             
       }
@@ -80,8 +80,8 @@ public class FenumInferenceTreeAnnotator extends InferenceTreeAnnotator {
 
       @Override
       public Void visitVariable(VariableTree varTree, AnnotatedTypeMirror atm) {
-        System.out.println("\nfenum inference tree annotator is visiting variable tree: " + varTree.getName().toString());
-            System.out.println("variable tree type is " + atm.getClass().getSimpleName() + "\n");
+        //System.out.println("\nfenum inference tree annotator is visiting variable tree: " + varTree.getName().toString());
+        //System.out.println("variable tree type is " + atm.getClass().getSimpleName() + "\n");
             
         //final VariableElement varElem = TreeUtils.elementFromDeclaration(varTree);
         // AnnotationMirror anno = realTypeFactory.getDeclAnnotation(varElem, Fenum.class);
@@ -123,8 +123,8 @@ public class FenumInferenceTreeAnnotator extends InferenceTreeAnnotator {
 
       @Override
       public Void visitLiteral(LiteralTree literalTree, AnnotatedTypeMirror atm) {
-        System.out.println("\nfenum inference tree annotator is visiting literal tree: " + literalTree.getValue().toString());
-            System.out.println("literal tree type is " + atm.getClass().getSimpleName() + "\n");
+         System.out.println("\nfenum inference tree annotator is visiting literal tree: " + literalTree.getValue().toString());
+         System.out.println("literal tree type is " + atm.getClass().getSimpleName() + "\n");
 
         TreePath path = atypeFactory.getPath(literalTree);
         if (path != null) {

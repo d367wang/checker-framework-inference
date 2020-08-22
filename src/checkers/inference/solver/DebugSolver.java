@@ -36,6 +36,13 @@ public class DebugSolver implements InferenceSolver {
             Collection<Constraint> constraints,
             QualifierHierarchy qualHierarchy,
             ProcessingEnvironment processingEnvironment) {
+      
+
+      System.out.println("-------------------constraints----------------------");
+      for(Constraint c:constraints) {
+        System.out.println(c);
+                
+      }
 
         List<String> output = new ArrayList<>();
 

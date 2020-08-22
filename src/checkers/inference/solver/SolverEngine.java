@@ -119,6 +119,12 @@ public class SolverEngine implements InferenceSolver {
 
 	System.out.println("using strategy: " + strategyName + "SolvingStrategy");
 
+        System.out.println("-------------------constraints----------------------");
+        for(Constraint c:constraints) {
+          System.out.println(c);
+                  
+        }
+
         InferenceResult inferenceResult = solvingStrategy.solve(solverEnvironment, slots, constraints, lattice);
 
         if (inferenceResult == null) {

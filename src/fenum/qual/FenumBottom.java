@@ -21,6 +21,6 @@ import java.lang.annotation.*;
 @TargetLocations({TypeUseLocation.EXPLICIT_LOWER_BOUND, TypeUseLocation.EXPLICIT_UPPER_BOUND})
 // Subtype relationships are set up by passing this class as a bottom
 // to the multigraph hierarchy constructor.
-@SubtypeOf({FenumA.class, FenumB.class, FenumC.class, FenumUnqualified.class})
+@SubtypeOf({Fenum.class, FenumUnqualified.class})
 @DefaultFor(TypeUseLocation.LOWER_BOUND)
 public @interface FenumBottom {}

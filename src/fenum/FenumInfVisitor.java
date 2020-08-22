@@ -4,6 +4,9 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.SwitchTree;
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.CaseTree;
 
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceVisitor;
@@ -66,4 +69,29 @@ public class FenumInfVisitor extends InferenceVisitor<FenumInfChecker, BaseAnnot
         return super.visitLiteral(node, p);
             
       }
+   
+        @Override
+        public Void visitSwitch(SwitchTree node, Void p) {
+          ExpressionTree expr = node.getExpression();
+          AnnotatedTypeMirror exprType = atypeFactory.getAnnotatedType(expr);
+
+          for (CaseTree caseExpr : node.getCases()) {
+            ExpressionTree realCaseExpr = caseExpr.getExpression();
+            if (realCaseExpr != null) {
+              AnnotatedTypeMirror caseType = atypeFactory.getAnnotatedType(realCaseExpr);
+              areEqual(exprType, caseType, "switch.type.inequal", node);
+
+              /*
+              this.commonAssignmentCheck(
+                  exprType, caseType, caseExpr, "switch.type.incompatible"
+                                         );
+              */
+                          
+            }
+                    
+          }
+          return super.visitSwitch(node, p);
+              
+       }
+
 }
