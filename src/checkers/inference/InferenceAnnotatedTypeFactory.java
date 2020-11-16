@@ -482,18 +482,27 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         assert root != null : "GenericAnnotatedTypeFactory.annotateImplicit: " +
                 " root needs to be set when used on trees; factory: " + this.getClass();
 
+        //System.out.println("before addComputedTypeAnnotations, atm = " + type.toString());
+
         // Moving this here forces the type variables to be annotated as a declaration
         // before they are used and therefore ensures that they have annotations before use
         treeAnnotator.visit(tree, type);
+
+        //System.out.println("after treeAnnotator, atm = " + type.toString());
 
         // TODO: instead of removing these calls, add special do-nothing type annotators/defaults.
         // typeAnnotator.visit(type, null);
          defaults.annotate(tree, type);
 
+         //System.out.println("after defaults annotate, atm = " + type.toString());
+
         if (iUseFlow) {
             CFValue as = getInferredValueFor(tree);
             if (as != null) {
                 applyInferredAnnotations(type, as);
+
+                //System.out.println("after applyInferredAnnotations, atm = " + type.toString());
+                
             }
         }
     }

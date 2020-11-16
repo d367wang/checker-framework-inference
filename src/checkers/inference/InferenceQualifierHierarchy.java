@@ -208,6 +208,8 @@ public class InferenceQualifierHierarchy extends MultiGraphQualifierHierarchy {
     @Override
     public boolean isSubtype(final AnnotationMirror subtype, final AnnotationMirror supertype) {
 
+        System.out.println("isSubtype: " + subtype.toString() + " and " + supertype.toString());
+
         if (!isVarAnnot(subtype) || !isVarAnnot(supertype)) {
             return true;
         }
@@ -255,6 +257,9 @@ public class InferenceQualifierHierarchy extends MultiGraphQualifierHierarchy {
         }
         assert a1 != null && a2 != null : "leastUpperBound accepts only NonNull types! 1 (" + a1 + " ) a2 (" + a2 + ")";
 
+        System.out.println("\n*****************************************************************");
+        System.out.println("leastUpperBound of " + a1.toString() + " and " + a2.toString());
+        
         QualifierHierarchy realQualifierHierarhcy = inferenceMain.getRealTypeFactory().getQualifierHierarchy();
         // for some reason LUB compares all annotations even if they are not in the same sub-hierarchy
         if (!isVarAnnot(a1)) {
@@ -303,6 +308,9 @@ public class InferenceQualifierHierarchy extends MultiGraphQualifierHierarchy {
                     return slotMgr.getAnnotation(var1);
                 } else {
                     // Create a new LubVariable for var1 and var2.
+
+                    System.out.println("Create a new LubVariable for slot " + var1.toString() + " and " + var2.toString());
+                  
                     final LubVariableSlot mergeVariableSlot = slotMgr.createLubVariableSlot(var1, var2);
                     constraintMgr.addSubtypeConstraint(var1, mergeVariableSlot);
                     constraintMgr.addSubtypeConstraint(var2, mergeVariableSlot);

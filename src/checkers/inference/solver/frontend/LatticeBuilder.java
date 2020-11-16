@@ -98,6 +98,12 @@ public class LatticeBuilder {
             supportedAnnos.add(bottom);
         }
 
+        collectConstantAnnotationMirrors(slots);
+        for (AnnotationMirror anno : allAnnotations) {
+          supportedAnnos.add(anno);
+                  
+        }
+
         allTypes = Collections.unmodifiableSet(supportedAnnos);
         numTypes = supportedAnnos.size();
 
@@ -129,8 +135,6 @@ public class LatticeBuilder {
                 incomparableType.put(i, incomparableOfi);
             }
         }
-
-        collectConstantAnnotationMirrors(slots);
 
         return new Lattice(subType, superType, incomparableType, allTypes, top,
                 bottom, numTypes, allAnnotations, qualHierarchy);

@@ -28,6 +28,8 @@ import checkers.inference.util.InferenceUtil;
 import checkers.inference.util.JaifBuilder;
 import org.checkerframework.javacutil.SystemUtil;
 
+import checkers.inference.model.Slot;
+
 /**
  * InferenceMain is the central coordinator to the inference system.
  *
@@ -191,6 +193,14 @@ public class InferenceMain {
 
         logger.fine(String.format("Starting checker framework with options: %s", checkerFrameworkArgs));
 
+
+        System.out.println("\ninvoke CF");
+        for (String s : checkerFrameworkArgs) {
+          System.out.print(s + " ");
+                  
+        }
+        System.out.println("\n");
+        
         StringWriter javacoutput = new StringWriter();
         boolean success = CheckerFrameworkUtil.invokeCheckerFramework(checkerFrameworkArgs.toArray(new String[checkerFrameworkArgs.size()]),
                 new PrintWriter(javacoutput, true));
@@ -269,6 +279,21 @@ public class InferenceMain {
 
         final ConstraintNormalizer constraintNormalizer = new ConstraintNormalizer();
         Set<Constraint> normalizedConstraints = constraintNormalizer.normalize(constraintManager.getConstraints());
+
+
+        System.out.println("\n\nstart solving ...");
+        System.out.println("slots:");
+        for (Slot s : slotManager.getSlots()) {
+          System.out.println(s.toString());
+                  
+        }
+        System.out.println("constraints:");
+        for (Constraint c : normalizedConstraints) {
+          System.out.println(c.toString());
+                  
+        }
+        System.out.println("\n\n");
+
 
         // TODO: Support multiple solvers or serialize before or after solving
         // TODO: Prune out unneeded variables

@@ -183,6 +183,9 @@ public class ConstraintManager {
             // Same for constraints below.
             checker.reportError(visitorState.getPath().getLeaf(), "subtype.constraint.unsatisfiable", subtype, supertype);
         } else {
+
+            System.out.println("\n--------------addSubtypeConstraint: " + constraint.toString());
+
             add(constraint);
         }
     }
@@ -198,6 +201,8 @@ public class ConstraintManager {
         if (constraint instanceof AlwaysFalseConstraint) {
             return false;
         } else {
+          System.out.println("\n-----------------addSubtypeConstraintNoErrorMsg: " + constraint.toString());
+          
             add(constraint);
             return true;
         }

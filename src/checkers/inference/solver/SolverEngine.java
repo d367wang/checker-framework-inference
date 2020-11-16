@@ -111,6 +111,12 @@ public class SolverEngine implements InferenceSolver {
 
         configureSolverEngineArgs(solverEnvironment);
 
+        System.out.println("slots used to solve constraints");
+        for (Slot s : slots) {
+          System.out.println(s.toString());
+                  
+        }
+
         //TODO: Add solve timing statistic.
         Lattice lattice = new LatticeBuilder().buildLattice(qualHierarchy, slots);
         SolvingStrategy solvingStrategy = createSolvingStrategy();

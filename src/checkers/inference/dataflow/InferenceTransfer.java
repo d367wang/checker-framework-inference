@@ -90,6 +90,8 @@ public class InferenceTransfer extends CFTransfer {
     @Override
     public TransferResult<CFValue, CFStore> visitAssignment(AssignmentNode assignmentNode, TransferInput<CFValue, CFStore> transferInput) {
 
+        System.out.println("\nAAAAAAAAaAAAAAAAAAAAAAAAssignment");
+      
         Node lhs = assignmentNode.getTarget();
         CFStore store = transferInput.getRegularStore();
         InferenceAnnotatedTypeFactory typeFactory = (InferenceAnnotatedTypeFactory) analysis.getTypeFactory();
@@ -138,6 +140,19 @@ public class InferenceTransfer extends CFTransfer {
             }
 
             return storeDeclaration(lhs, (VariableTree) assignmentNode.getTree(), store, typeFactory);
+
+            /*
+            final TransferResult<CFValue, CFStore> result;
+            if (atm.getKind() == TypeKind.TYPEVAR) {
+              result = createTypeVarRefinementVars(assignmentNode.getTarget(), assignmentNode.getTree(),
+                                                   store, (AnnotatedTypeVariable) atm);
+                          
+            } else {
+              result = createRefinementVar(assignmentNode.getTarget(), assignmentNode.getTree(), store, atm);
+                          
+            }
+            return result;
+            */
 
         } else if (lhs.getTree().getKind() == Tree.Kind.IDENTIFIER
                 || lhs.getTree().getKind() == Tree.Kind.MEMBER_SELECT) {

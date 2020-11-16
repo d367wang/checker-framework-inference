@@ -483,6 +483,12 @@ public class InferenceVisitor<Checker extends InferenceChecker,
         String valueTypeString = valueType.toString();
         String varTypeString = varType.toString();
 
+        System.out.println("\n========commonAssignmentCheck===========");
+        System.out.println("lhs = " + varTypeString);
+        System.out.println("rhs = " + valueTypeString);
+        System.out.println("=========================================\n");
+        
+
         // If both types as strings are the same, try outputting
         // the type including also invisible qualifiers.
         // This usually means there is a mistake in type defaulting.
@@ -510,6 +516,8 @@ public class InferenceVisitor<Checker extends InferenceChecker,
         // on the LHS must be equal to the variable on the RHS.
         if (infer) {
             maybeAddRefinementVariableConstraints(varType, valueType);
+            System.out.println("maybeAddRefinementVariableConstraints\n");
+            
         }
 
         // this will also add a subtyping constraint between any refinement variables added and
@@ -646,6 +654,26 @@ public class InferenceVisitor<Checker extends InferenceChecker,
             // TODO: RECONSIDER THIS WHEN WE CONSIDER WILDCARDS
             if (varType.getKind() != TypeKind.WILDCARD) {
                 Slot sup = InferenceMain.getInstance().getSlotManager().getVariableSlot(varType);
+
+
+                if (sup instanceof RefinementVariableSlot) {
+                  System.out.println("sup instanceof RefinementVariableSlot");
+                                  
+                } else {
+                  System.out.println("sup not instanceof RefinementVariableSlot");
+                  System.out.println("sup is instanceof " + sup.getClass().getSimpleName().toString());
+                                  
+                }
+
+                if (!InferenceMain.getInstance().isPerformingFlow()) {
+                  System.out.println("not perform flow");
+                                  
+                } else {
+                  System.out.println("perform flow");
+                                  
+                }
+                
+                
                 if (sup instanceof RefinementVariableSlot && !InferenceMain.getInstance().isPerformingFlow()) {
                     inferenceRefinementVariable = true;
 
