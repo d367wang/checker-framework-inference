@@ -40,7 +40,8 @@ public class LubVariableSlot extends Slot {
      */
     @Override
     public boolean isInsertable() {
-        return false;
+        // return false;
+        return true;
     }
 
     @Override

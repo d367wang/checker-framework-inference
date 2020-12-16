@@ -37,6 +37,7 @@ public class ComparisonVariableSlot extends Slot {
      */
     @Override
     public boolean isInsertable() {
-        return false;
+        // return false;
+        return true;
     }
 }

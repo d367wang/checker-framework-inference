@@ -11,6 +11,7 @@ import org.checkerframework.javacutil.TypesUtils;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.type.TypeKind;
@@ -32,6 +33,7 @@ import checkers.inference.model.Slot;
  *
  */
 public class InferenceValue extends CFValue {
+    private static final Logger logger = Logger.getLogger(InferenceValue.class.getName());
 
 
     public InferenceValue(InferenceAnalysis analysis, Set<AnnotationMirror> annotations, TypeMirror underlyingType) {
@@ -91,6 +93,18 @@ public class InferenceValue extends CFValue {
             if (underlyingType.getKind() != TypeKind.TYPEVAR) {
                 Slot thisSlot = getEffectiveSlot(this);
                 Slot otherSlot = getEffectiveSlot(other);
+
+                StringBuilder sb = new StringBuilder("**************calling mostSpecific on:");
+                sb.append("thisSlot: ");
+                sb.append(thisSlot.getClass().getSimpleName());
+                sb.append(",    location: ");
+                sb.append(thisSlot.getLocation())
+                sb.append("\notherSlot: ");
+                sb.append(otherSlot.getClass().getSimpleName());
+                sb.append(",    location: ");
+                sb.append(otherSlot.getLocation())
+                sb.append("\n");
+                logger.fine(sb.toString());
                 return mostSpecificFromSlot(thisSlot, otherSlot, other, backup);
             } else {
                 return mostSpecificTypeVariable(underlyingType, other, backup);
