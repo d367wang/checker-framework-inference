@@ -98,11 +98,11 @@ public class InferenceValue extends CFValue {
                 sb.append("thisSlot: ");
                 sb.append(thisSlot.getClass().getSimpleName());
                 sb.append(",    location: ");
-                sb.append(thisSlot.getLocation())
+                sb.append(thisSlot.getLocation());
                 sb.append("\notherSlot: ");
                 sb.append(otherSlot.getClass().getSimpleName());
                 sb.append(",    location: ");
-                sb.append(otherSlot.getLocation())
+                sb.append(otherSlot.getLocation());
                 sb.append("\n");
                 logger.fine(sb.toString());
                 return mostSpecificFromSlot(thisSlot, otherSlot, other, backup);
