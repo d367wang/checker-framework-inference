@@ -21,6 +21,7 @@ import javax.lang.model.util.Types;
 import checkers.inference.InferenceMain;
 import checkers.inference.SlotManager;
 import checkers.inference.model.RefinementVariableSlot;
+import checkers.inference.model.ComparisonVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
@@ -96,16 +97,18 @@ public class InferenceValue extends CFValue {
                 Slot thisSlot = getEffectiveSlot(this);
                 Slot otherSlot = getEffectiveSlot(other);
 
-                StringBuilder sb = new StringBuilder("**************calling mostSpecific on:");
-                sb.append("thisSlot: ");
-                sb.append(thisSlot.getClass().getSimpleName());
+                StringBuilder sb = new StringBuilder("\n\n**************calling mostSpecific on:");
+                sb.append("\nthisSlot: ");
+                // sb.append(thisSlot.getClass().getSimpleName());
+                sb.append(thisSlot);
                 sb.append(",    location: ");
                 sb.append(thisSlot.getLocation());
                 sb.append("\notherSlot: ");
-                sb.append(otherSlot.getClass().getSimpleName());
+                // sb.append(otherSlot.getClass().getSimpleName());
+                sb.append(otherSlot);
                 sb.append(",    location: ");
                 sb.append(otherSlot.getLocation());
-                sb.append("\n");
+                sb.append("\n\n");
                 logger.fine(sb.toString());
                 return mostSpecificFromSlot(thisSlot, otherSlot, other, backup);
             } else {
@@ -241,12 +244,22 @@ public class InferenceValue extends CFValue {
         Slot slot = getEffectiveSlot(this);
         if (slot.isConstant()) {
             sb.append(((ConstantSlot) slot).getValue());
-        } else {
-            sb.append(slot.getClass().getSimpleName());
-            sb.append("(");
-            sb.append(((VariableSlot)slot).getId());
+        } else if (slot instanceof RefinementVariableSlot) {
+            sb.append(slot);
+            sb.append("(-> ");
+            sb.append(((RefinementVariableSlot)slot).getRefined().getId());
             sb.append(")");
+
+        } else if (slot instanceof ComparisonVariableSlot) {
+            sb.append(slot);
+            sb.append(" (-> ");
+            sb.append(((ComparisonVariableSlot)slot).getRefined().getId());
+            sb.append(")");
+
+        } else {
+            sb.append(slot);
         }
+
         sb.append(", underlyingType=");
         sb.append(underlyingType);
         sb.append("}");

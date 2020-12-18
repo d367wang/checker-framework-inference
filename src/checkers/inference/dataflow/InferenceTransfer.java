@@ -103,6 +103,9 @@ public class InferenceTransfer extends CFTransfer {
         // Target tree is null for field access's
         Tree targetTree = assignmentNode.getTarget().getTree();
 
+        logger.fine("\nvisiting assignment::::::::::::::::::::::::::::");
+        logger.fine("target tree of AssignmentNode: " + targetTree + "\n");
+
         AnnotatedTypeMirror atm;
         if (targetTree != null) {
             // Try to use the target tree if possible.
@@ -207,11 +210,15 @@ public class InferenceTransfer extends CFTransfer {
             Tree assignmentTree, CFStore store,
             AnnotatedTypeMirror atm) {
 
-        logger.fine("\n------------createRefinementVar, lhs: " + lhs + ", assignmentTree: " + assignmentTree + ", atm: " + atm);
+        logger.fine("\n\n------------createRefinementVar, lhs: " + lhs + ", assignmentTree: " + assignmentTree + ", atm: " + atm);
+
+        InferenceAnnotatedTypeFactory typeFactory = (InferenceAnnotatedTypeFactory) analysis.getTypeFactory();
+        logger.fine("getInferredValueFor " + lhs.getTree() + ": " + typeFactory.getInferredValueFor(lhs.getTree()));
+
         Slot slotToRefine = getInferenceAnalysis().getSlotManager().getVariableSlot(atm);
         while (slotToRefine instanceof RefinementVariableSlot
         		|| slotToRefine instanceof ComparisonVariableSlot) {
-            logger.fine("slotToRefine is: " + slotToRefine.getClass().getSimpleName());
+            logger.fine("slotToRefine is: " + slotToRefine);
         	if (slotToRefine instanceof RefinementVariableSlot) {
         		slotToRefine = ((RefinementVariableSlot)slotToRefine).getRefined();
         	} else if (slotToRefine instanceof ComparisonVariableSlot) {
