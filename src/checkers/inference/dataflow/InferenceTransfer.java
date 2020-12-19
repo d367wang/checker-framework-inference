@@ -98,15 +98,7 @@ public class InferenceTransfer extends CFTransfer {
         Tree targetTree = assignmentNode.getTarget().getTree();
 
         AnnotatedTypeMirror atm;
-        if (targetTree != null) {
-            // Try to use the target tree if possible.
-            // Getting the Type of a tree for a desugared compound assignment returns a comb variable
-            // which is not what we want to make a refinement variable of.
-            atm = typeFactory.getAnnotatedType(targetTree);
-        } else {
-            // Target trees can be null for refining library fields.
-            atm = typeFactory.getAnnotatedType(assignmentNode.getTree());
-        }
+        atm = typeFactory.getAnnotatedTypeLhs(targetTree);
 
         if (targetTree != null && targetTree.getKind() == Tree.Kind.ARRAY_ACCESS) {
             // Don't create refinement variables on array assignments.
@@ -209,11 +201,7 @@ public class InferenceTransfer extends CFTransfer {
             AnnotatedTypeMirror atm) {
 
         Slot slotToRefine = getInferenceAnalysis().getSlotManager().getVariableSlot(atm);
-        // Getting the declared type of a RefinementVariableSlot
-        // getRefined() should always return the slot of the declared type value
-        if (slotToRefine instanceof RefinementVariableSlot) {
-        	slotToRefine = ((RefinementVariableSlot)slotToRefine).getRefined();
-        }
+        assert (slotToRefine instanceof VariableSlot) && !(slotToRefine instanceof RefinementVariableSlot);
 
         logger.fine("Creating refinement variable for tree: " + assignmentTree);
         RefinementVariableSlot refVar;
