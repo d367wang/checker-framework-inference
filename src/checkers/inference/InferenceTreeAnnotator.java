@@ -376,6 +376,7 @@ public class InferenceTreeAnnotator extends TreeAnnotator {
      */
     @Override
     public Void visitUnary(UnaryTree node, AnnotatedTypeMirror type) {
+        System.out.println("-----------visiting UNARY TREE: " + node);
         // Do NOT call super method.
         // To match TreeAnnotator, we do not apply implicits
 
@@ -407,12 +408,24 @@ public class InferenceTreeAnnotator extends TreeAnnotator {
      */
     @Override
     public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
+        System.out.println("-----------visiting BINARY TREE: " + node);
+
         // Do NOT call super method.
         // To match TreeAnnotator, we do not apply implicits
 
         // Unary trees and compound assignments (x++ or x +=y) get desugared
         // by dataflow to be x = x + 1 and x = x + y.
         // Dataflow will then look up the types of the binary operations (x + 1) and (y + 1)
+        //
+        // InferenceTransfer currently sets the value of a compound assignment or unary
+        // to be the just the type of the variable.
+        // So, the type returned from this for desugared trees is not used.
+        // We don't create a LUB to reduce confusion
+        if (realTypeFactory.getPath(node) == null) {
+            // Desugared tree's don't have paths.
+            // There currently is some case that we are missing that requires us to annotate these.
+            return null;
+        }
 
         variableAnnotator.visit(type, node);
         return null;
