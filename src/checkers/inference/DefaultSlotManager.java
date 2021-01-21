@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -39,6 +40,7 @@ import checkers.inference.qual.VarAnnot;
  * @see checkers.inference.SlotManager
  */
 public class DefaultSlotManager implements SlotManager {
+    private static final Logger logger = Logger.getLogger(DefaultSlotManager.class.getSimpleName());
 
     private final AnnotationMirror varAnnot;
 
@@ -346,14 +348,17 @@ public class DefaultSlotManager implements SlotManager {
         if (location.getKind() == AnnotationLocation.Kind.MISSING) {
             //Don't cache slot for MISSING LOCATION. Just create a new one and return.
             refinementVariableSlot = new RefinementVariableSlot(location, nextId(), refined);
+            logger.fine("Created new " + refinementVariableSlot + " for MISSING_LOCATION");
             addToSlots(refinementVariableSlot);
         } else if (locationCache.containsKey(location)) {
             int id = locationCache.get(location);
             refinementVariableSlot = (RefinementVariableSlot) getSlot(id);
+            logger.fine("Location already in locationCache, return corresponding " + refinementVariableSlot);
         } else {
             refinementVariableSlot = new RefinementVariableSlot(location, nextId(), refined);
             addToSlots(refinementVariableSlot);
             locationCache.put(location, refinementVariableSlot.getId());
+            logger.fine("Created new " + refinementVariableSlot + " for the location");
         }
         return refinementVariableSlot;
     }

@@ -14,6 +14,7 @@ import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.TreeUtils;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeKind;
@@ -50,6 +51,8 @@ import checkers.inference.util.InferenceUtil;
  * annotations representing the VariableSlots onto the AnnotateTypeMirror.
  */
 public class InferenceTreeAnnotator extends TreeAnnotator {
+    private static final Logger logger = Logger.getLogger(InferenceTreeAnnotator.class.getName());
+
 
     // private final SlotManager slotManager;
     private final VariableAnnotator variableAnnotator;
@@ -376,7 +379,7 @@ public class InferenceTreeAnnotator extends TreeAnnotator {
      */
     @Override
     public Void visitUnary(UnaryTree node, AnnotatedTypeMirror type) {
-        System.out.println("-----------visiting UNARY TREE: " + node);
+        logger.fine("-----------annotating UNARY TREE: " + node);
         // Do NOT call super method.
         // To match TreeAnnotator, we do not apply implicits
 
@@ -408,7 +411,7 @@ public class InferenceTreeAnnotator extends TreeAnnotator {
      */
     @Override
     public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
-        System.out.println("-----------visiting BINARY TREE: " + node);
+        logger.fine("-----------annotating BINARY TREE: " + node);
 
         // Do NOT call super method.
         // To match TreeAnnotator, we do not apply implicits
@@ -421,11 +424,11 @@ public class InferenceTreeAnnotator extends TreeAnnotator {
         // to be the just the type of the variable.
         // So, the type returned from this for desugared trees is not used.
         // We don't create a LUB to reduce confusion
-        if (realTypeFactory.getPath(node) == null) {
+        //if (realTypeFactory.getPath(node) == null) {
             // Desugared tree's don't have paths.
             // There currently is some case that we are missing that requires us to annotate these.
-            return null;
-        }
+        //    return null;
+        //}
 
         variableAnnotator.visit(type, node);
         return null;

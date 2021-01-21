@@ -96,6 +96,7 @@ public class InferenceTransfer extends CFTransfer {
     @Override
     public TransferResult<CFValue, CFStore> visitAssignment(AssignmentNode assignmentNode, TransferInput<CFValue, CFStore> transferInput) {
 
+        logger.fine("\n\n VISIT AssignmentNode: " + assignmentNode);
         Node lhs = assignmentNode.getTarget();
         CFStore store = transferInput.getRegularStore();
         InferenceAnnotatedTypeFactory typeFactory = (InferenceAnnotatedTypeFactory) analysis.getTypeFactory();
@@ -152,6 +153,10 @@ public class InferenceTransfer extends CFTransfer {
         } else if (lhs.getTree().getKind() == Tree.Kind.IDENTIFIER
                 || lhs.getTree().getKind() == Tree.Kind.MEMBER_SELECT) {
             // Create Refinement Variable
+            
+            //if (assignmentNode.getTree() instanceof CompoundAssignmentTree || assignmentNode.getTree() instanceof UnaryTree) {
+                logger.fine("^^^^^^^^^^^^^When visiting AssignmentNode: " + assignmentNode + "\nvvvvvvvvvvvvvvv create Refinement Variable on " + assignmentNode.getTree().getClass().getSimpleName() + ": " + assignmentNode.getTree() + "\n");
+            //}
 
             final TransferResult<CFValue, CFStore> result;
             if (atm.getKind() == TypeKind.TYPEVAR) {
@@ -233,6 +238,8 @@ public class InferenceTransfer extends CFTransfer {
 
             createdRefinementVariables.put(assignmentTree, refVar);
         }
+
+        logger.fine("refinement variable for " + assignmentTree + ": " + refVar + "\n");
 
         atm.replaceAnnotation(getInferenceAnalysis().getSlotManager().getAnnotation(refVar));
 
