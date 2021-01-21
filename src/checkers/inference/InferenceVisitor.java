@@ -455,6 +455,7 @@ public class InferenceVisitor<Checker extends InferenceChecker,
     @Override
     protected void commonAssignmentCheck(Tree varTree, ExpressionTree valueExp,
             @CompilerMessageKey String errorKey) {
+        logger.fine("commonAssignmentCheck....lhs: " + varTree + ",  rhs: " + valueExp);
         if (!validateTypeOf(varTree)) {
             return;
         }
@@ -478,6 +479,8 @@ public class InferenceVisitor<Checker extends InferenceChecker,
     protected void commonAssignmentCheck(AnnotatedTypeMirror varType,
             AnnotatedTypeMirror valueType, Tree valueTree, @CompilerMessageKey
             String errorKey) {
+        logger.fine("commonAssignmentCheck....lhs atm: " + varType + ",  rhs atm: " + valueType);
+
         // ####### Copied Code ########
 
         String valueTypeString = valueType.toString();
