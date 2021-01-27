@@ -330,6 +330,8 @@ public class DefaultSlotManager implements SlotManager {
         if (location.getKind() == AnnotationLocation.Kind.MISSING) {
             //Don't cache slot for MISSING LOCATION. Just create a new one and return.
             variableSlot = new VariableSlot(location, nextId(), type);
+            logger.fine("create " + variableSlot + " on MISSING_LOCATION: " + location);
+            printCallStack();
             addToSlots(variableSlot);
         } else if (locationCache.containsKey(location)) {
             int id = locationCache.get(location);
@@ -506,5 +508,20 @@ public class DefaultSlotManager implements SlotManager {
     public AnnotationMirror createEquivalentVarAnno(AnnotationMirror realQualifier) {
         ConstantSlot varSlot = createConstantSlot(realQualifier);
         return getAnnotation(varSlot);
+    }
+
+    public void printCallStack() {
+        StringBuilder sb = new StringBuilder();
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        for (StackTraceElement element : stackTraceElements) {
+            sb.append(element.getClassName());
+            sb.append(".");
+            sb.append(element.getMethodName());
+            sb.append("  Line ");
+            sb.append(element.getLineNumber());
+            sb.append("\n");
+        }
+        sb.append("\n\n");
+        logger.fine(sb.toString());
     }
 }

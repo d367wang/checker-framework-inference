@@ -22,10 +22,8 @@ import org.checkerframework.javacutil.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.type.TypeKind;
 
 import com.sun.source.tree.CompoundAssignmentTree;
@@ -42,7 +40,6 @@ import checkers.inference.model.ComparisonVariableSlot;
 import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
-import checkers.inference.qual.VarAnnot;
 import checkers.inference.util.InferenceUtil;
 
 /**
@@ -153,10 +150,39 @@ public class InferenceTransfer extends CFTransfer {
         } else if (lhs.getTree().getKind() == Tree.Kind.IDENTIFIER
                 || lhs.getTree().getKind() == Tree.Kind.MEMBER_SELECT) {
             // Create Refinement Variable
-            
-            //if (assignmentNode.getTree() instanceof CompoundAssignmentTree || assignmentNode.getTree() instanceof UnaryTree) {
-                logger.fine("^^^^^^^^^^^^^When visiting AssignmentNode: " + assignmentNode + "\nvvvvvvvvvvvvvvv create Refinement Variable on " + assignmentNode.getTree().getClass().getSimpleName() + ": " + assignmentNode.getTree() + "\n");
-            //}
+
+            logger.fine("^^^^^^^^^^^^^assignmentNode.getTree(): " + assignmentNode.getTree());
+            logger.fine("lhs.getTree(): " + lhs.getTree());
+
+//            if (assignmentNode.getTree().getKind() ==  ||
+//                assignmentNode.getTree().getKind() == Tree.Kind.POSTFIX_DECREMENT) {
+//                Node rhs = assignmentNode.getExpression();
+//                CFValue rhsValue = transferInput.getValueOfSubNode(rhs);
+//                logger.fine("underlying tree is UnaryTree, getValueOfSubNode: " + rhsValue + "\n");
+//            }
+
+            // There are two assignments corresponding to a unary tree in form of `x++` -
+            // `x=x+1` and `tempPostfix#num0=x`. We DO NOT create refinement variable for
+            // the latter assignment.
+//            if (lhs.getTree().toString().startsWith("tempPostfix#")) {
+//                logger.fine("DO NOT create refinement variable for " + targetTree + " in " + assignmentNode);
+//                CFValue result = analysis.createAbstractValue(atm);
+//                return new RegularTransferResult<CFValue, CFStore>(finishValue(result, store), store);
+//            }
+            // Only handle the other artificial assignment corresponding to unary tree in form of `x++`
+            UnaryTree unaryTree = analysis.getUnaryTreeForAssign(assignmentNode);
+            logger.fine("analysis.getUnaryTreeForAssign( " + assignmentNode + " )" + ": " + unaryTree);
+            if (unaryTree != null &&
+                    (unaryTree.getKind() == Tree.Kind.POSTFIX_INCREMENT ||
+                     unaryTree.getKind() == Tree.Kind.POSTFIX_DECREMENT)) {
+                // If the underlying tree is a postfix increment/decrement unary tree,
+                // record the annotated type of the unary tree before it's refined,
+                // which will be used to generate equality constraint for tempPostfix
+                // variable by InferenceVisitor.
+                AnnotatedTypeMirror refinedATM = typeFactory.getAnnotatedType(unaryTree.getExpression());
+//                RefinementVariableSlot slot = (RefinementVariableSlot) getInferenceAnalysis().getSlotManager().getVariableSlot(refinedATM);
+                typeFactory.cacheTempVariableRefinedType(unaryTree, refinedATM);
+            }
 
             final TransferResult<CFValue, CFStore> result;
             if (atm.getKind() == TypeKind.TYPEVAR) {
@@ -222,7 +248,7 @@ public class InferenceTransfer extends CFTransfer {
         	}
         }
 
-        logger.fine("Creating refinement variable for tree: " + assignmentTree);
+        logger.fine("Creating refinement variable for tree: " + assignmentTree + ", LHS: " + lhs);
         RefinementVariableSlot refVar;
         if (createdRefinementVariables.containsKey(assignmentTree)) {
             refVar = createdRefinementVariables.get(assignmentTree);
@@ -396,5 +422,12 @@ public class InferenceTransfer extends CFTransfer {
 
     private boolean isDeclarationWithInitializer(AssignmentNode assignmentNode) {
         return (assignmentNode.getTree().getKind() == Tree.Kind.VARIABLE);
+    }
+
+
+    @Override
+    public TransferResult<CFValue, CFStore> visitLocalVariable(LocalVariableNode n, TransferInput<CFValue, CFStore> in) {
+        logger.fine("Transfer Function for LocalVariableNode: " + n);
+        return super.visitLocalVariable(n, in);
     }
 }

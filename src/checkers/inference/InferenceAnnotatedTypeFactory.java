@@ -1,5 +1,6 @@
 package checkers.inference;
 
+import checkers.inference.model.*;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.flow.CFAbstractAnalysis;
 import org.checkerframework.framework.flow.CFAnalysis;
@@ -126,6 +127,12 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     // the same variable slot for all of these locations.  This map contains those variables.
     private Map<Class<? extends Annotation>, VariableSlot> constantToVarAnnot = new HashMap<>();
 
+    /** The flag that indicates if the underlying type system is applicable for primitive types **/
+    private boolean forPrimitive;
+
+    /** The map from the artificial variable for postfix expression to its real refined value **/
+    private Map<Tree, AnnotatedTypeMirror> tempVarToRefinedType = new HashMap<>();
+
     public InferenceAnnotatedTypeFactory(
             InferenceChecker inferenceChecker,
             boolean withCombineConstraints,
@@ -133,6 +140,28 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             InferrableChecker realChecker,
             SlotManager slotManager,
             ConstraintManager constraintManager) {
+        this(inferenceChecker, withCombineConstraints, realTypeFactory, realChecker,
+                slotManager, constraintManager, false);
+    }
+
+    /**
+     *
+     * @param inferenceChecker
+     * @param withCombineConstraints
+     * @param realTypeFactory
+     * @param realChecker
+     * @param slotManager
+     * @param constraintManager
+     * @param forPrimitive  true if the underlying type system is applicable for primitive types
+     */
+    public InferenceAnnotatedTypeFactory(
+            InferenceChecker inferenceChecker,
+            boolean withCombineConstraints,
+            BaseAnnotatedTypeFactory realTypeFactory,
+            InferrableChecker realChecker,
+            SlotManager slotManager,
+            ConstraintManager constraintManager,
+            boolean forPrimitive) {
 
         super(inferenceChecker, true);
 
@@ -142,6 +171,7 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         this.realChecker = realChecker;
         this.slotManager = slotManager;
         this.constraintManager = constraintManager;
+        this.forPrimitive = forPrimitive;
 
         variableAnnotator = createVariableAnnotator();
         bytecodeTypeAnnotator = new BytecodeTypeAnnotator(this, realTypeFactory);
@@ -577,6 +607,32 @@ public class InferenceAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     @Override
     protected Set<? extends AnnotationMirror> getDefaultTypeDeclarationBounds() {
         return realTypeFactory.getQualifierHierarchy().getTopAnnotations();
+    }
+
+    public boolean appliesForPrimitive() {
+        return forPrimitive;
+    }
+
+    /**
+     * Caches the refinement slot for a given temp variable.
+     * @param tree the tree for the temp variable
+     * @param type the refined type for the initialized temp variable
+     */
+    public void cacheTempVariableRefinedType(Tree tree, AnnotatedTypeMirror type) {
+        if (!tempVarToRefinedType.containsKey(tree)) {
+            tempVarToRefinedType.put(tree, type);
+            logger.fine("cache refined type for tree " + tree + ": " + type);
+        }
+    }
+
+    /**
+     * Get the refined annotated type for a given temp variable.
+     *
+     * @param tree the tree that represents the temp variable
+     * @return the refined type for the temp variable
+     */
+    public AnnotatedTypeMirror getTempVariableRefinedType(Tree tree) {
+        return tempVarToRefinedType.get(tree);
     }
 }
 

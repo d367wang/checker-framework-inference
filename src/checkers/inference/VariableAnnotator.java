@@ -53,6 +53,7 @@ import com.sun.source.tree.ParameterizedTypeTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeParameterTree;
+import com.sun.source.tree.UnaryTree;
 import com.sun.source.tree.UnionTypeTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.tree.WildcardTree;
@@ -496,6 +497,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
      * @param tree Tree for which we want to create variables
      */
     private Slot addPrimaryVariable(AnnotatedTypeMirror atm, final Tree tree) {
+        logger.fine("addPrimaryVariable, atm: " + atm + "; " + tree.getClass().getSimpleName() + " " + tree);
 
         final Slot variable;
         if (treeToVarAnnoPair.containsKey(tree)) {
@@ -508,6 +510,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
             }
         } else {
             AnnotationLocation location = treeToLocation(tree);
+            logger.fine("replaceOrCreateEquivalentVarAnno, location: " + location);
             variable = replaceOrCreateEquivalentVarAnno(atm, tree, location);
             final Pair<Slot, Set<? extends AnnotationMirror>> varATMPair = Pair
                     .of(variable,
@@ -1247,10 +1250,17 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
      */
     @Override
     public Void visitPrimitive(AnnotatedPrimitiveType primitiveType, Tree tree) {
+        logger.fine("!!!!!!!!!!!! visitPrimitive, primitiveType: " + primitiveType + "; " +
+                tree.getClass().getSimpleName() + ": " + tree + "\n");
         if (tree instanceof BinaryTree) {
             // Since there are so many kinds of binary trees
             // handle these with an if instead of in the switch.
             handleBinaryTree(primitiveType, (BinaryTree)tree);
+            return null;
+        }
+
+        if (tree instanceof UnaryTree) {
+            handleUnaryTree(primitiveType, (UnaryTree)tree);
             return null;
         }
 
@@ -1532,6 +1542,32 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
                 // The slot returned was a constant. Regenerating it is ok.
             }
         }
+    }
+
+    public void handleUnaryTree(AnnotatedTypeMirror atm, UnaryTree unaryTree) {
+        if (unaryTree.getKind() != Tree.Kind.POSTFIX_INCREMENT &&
+                unaryTree.getKind() != Tree.Kind.POSTFIX_DECREMENT) {
+            // Only treat postfix expression tree specially
+            return;
+        }
+        logger.fine("handleUnaryTree: " + unaryTree + ", ATM before: " + atm);
+        if (treeToVarAnnoPair.containsKey(unaryTree)) {
+            atm.replaceAnnotations(treeToVarAnnoPair.get(unaryTree).second);
+        } else {
+            AnnotatedTypeMirror exp = inferenceTypeFactory.getTempVariableRefinedType(unaryTree);
+            assert exp != null;
+            Set<? extends AnnotationMirror> annos = exp.getAnnotations();
+            atm.clearAnnotations();
+            atm.addMissingAnnotations(annos);
+            if (slotManager.getVariableSlot(atm).isVariable()) {
+                final Pair<Slot, Set<? extends AnnotationMirror>> varATMPair = Pair.<Slot, Set<? extends AnnotationMirror>>of(
+                        slotManager.getVariableSlot(atm), annos);
+                treeToVarAnnoPair.put(unaryTree, varATMPair);
+            } else {
+                // The slot returned was a constant. Regenerating it is ok.
+            }
+        }
+        logger.fine("handleUnaryTree: " + unaryTree + ", ATM after: " + atm);
     }
 
     /**
