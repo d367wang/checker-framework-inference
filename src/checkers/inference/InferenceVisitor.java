@@ -857,26 +857,37 @@ public class InferenceVisitor<Checker extends InferenceChecker,
     protected void checkConstructorResult(
             AnnotatedExecutableType constructorType, ExecutableElement constructorElement) {}
 
+
     @Override
     public Void visitUnary(UnaryTree node, Void p) {
         logger.fine("InferenceVisitor visitUnary: " + node + "\n\n\n");
-        logger.fine("getAnnotatedTypeLhs( node.getExpression() = " +
-                node.getExpression() + " ):  " + atypeFactory.getAnnotatedTypeLhs(node.getExpression()));
-        if (infer &&
-                (node.getKind() == Tree.Kind.POSTFIX_INCREMENT ||
-                 node.getKind() == Tree.Kind.POSTFIX_DECREMENT)) {
-            // For postfix increment/decrement, add additional equality constraint
-            // between the refined type of `tempPostfix#num` (which is stored in ATF)
-            // and the expression type.
-            AnnotatedTypeMirror tempPostfixATM = ((InferenceAnnotatedTypeFactory) atypeFactory).getTempVariableRefinedType(node);
-            logger.fine(node + " ATM: " + tempPostfixATM + "\n\n\n");
-            if (tempPostfixATM != null) {
-                AnnotatedTypeMirror expType = atypeFactory.getAnnotatedType(node);
-                areEqual(tempPostfixATM, expType, "", node);
-            } else {
-                logger.fine("can NOT find tempPosfix: " + node + "\n\n\n");
-            }
+
+        if (!infer) {
+            return super.visitUnary(node, p);
         }
-        return super.visitUnary(node, p);
+
+        switch (node.getKind()) {
+            case POSTFIX_INCREMENT:
+            case POSTFIX_DECREMENT:
+                // For postfix increment/decrement, add additional equality constraint
+                // between the refined type of `tempPostfix#num` (which is stored in ATF)
+                // and the expression type.
+                AnnotatedTypeMirror tempPostfixATM = ((InferenceAnnotatedTypeFactory) atypeFactory).getTempVariableRefinedType(node);
+                logger.fine(node + " ATM: " + tempPostfixATM + "\n\n\n");
+                if (tempPostfixATM != null) {
+                    AnnotatedTypeMirror expType = atypeFactory.getAnnotatedType(node);
+                    areEqual(tempPostfixATM, expType, "", node);
+                }
+            case PREFIX_INCREMENT:
+            case PREFIX_DECREMENT:
+                AnnotatedTypeMirror varType = atypeFactory.getAnnotatedType(node.getExpression());
+                AnnotatedTypeMirror valueType = atypeFactory.getAnnotatedTypeRhsUnaryAssign(node);
+                commonAssignmentCheck(varType, valueType, node, "");
+                return null;
+
+            default:
+                return super.visitUnary(node, p);
+        }
     }
+
 }
