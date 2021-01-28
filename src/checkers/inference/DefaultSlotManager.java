@@ -330,8 +330,8 @@ public class DefaultSlotManager implements SlotManager {
         if (location.getKind() == AnnotationLocation.Kind.MISSING) {
             //Don't cache slot for MISSING LOCATION. Just create a new one and return.
             variableSlot = new VariableSlot(location, nextId(), type);
-            logger.fine("create " + variableSlot + " on MISSING_LOCATION: " + location);
-            printCallStack();
+//            logger.fine("create " + variableSlot + " on MISSING_LOCATION: " + location);
+//            printCallStack();
             addToSlots(variableSlot);
         } else if (locationCache.containsKey(location)) {
             int id = locationCache.get(location);

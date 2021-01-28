@@ -44,6 +44,7 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.ThrowTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
+import com.sun.source.tree.UnaryTree;
 import com.sun.source.tree.VariableTree;
 
 
@@ -352,6 +353,7 @@ public class InferenceVisitor<Checker extends InferenceChecker,
                 if (!InferenceMain.getInstance().isPerformingFlow()) {
                     logger.fine("InferenceVisitor::areEqual: Equality constraint constructor invocation.");
                     InferenceMain.getInstance().getConstraintManager().addEqualityConstraint(el1, el2);
+                    logger.fine("addEqualityConstraint: " + el1 + " and " + el2);
                 }
             }
         } else {
@@ -854,5 +856,27 @@ public class InferenceVisitor<Checker extends InferenceChecker,
     // Do NOT perform this check until issue #218 is resolved
     protected void checkConstructorResult(
             AnnotatedExecutableType constructorType, ExecutableElement constructorElement) {}
-    
+
+    @Override
+    public Void visitUnary(UnaryTree node, Void p) {
+        logger.fine("InferenceVisitor visitUnary: " + node + "\n\n\n");
+        logger.fine("getAnnotatedTypeLhs( node.getExpression() = " +
+                node.getExpression() + " ):  " + atypeFactory.getAnnotatedTypeLhs(node.getExpression()));
+        if (infer &&
+                (node.getKind() == Tree.Kind.POSTFIX_INCREMENT ||
+                 node.getKind() == Tree.Kind.POSTFIX_DECREMENT)) {
+            // For postfix increment/decrement, add additional equality constraint
+            // between the refined type of `tempPostfix#num` (which is stored in ATF)
+            // and the expression type.
+            AnnotatedTypeMirror tempPostfixATM = ((InferenceAnnotatedTypeFactory) atypeFactory).getTempVariableRefinedType(node);
+            logger.fine(node + " ATM: " + tempPostfixATM + "\n\n\n");
+            if (tempPostfixATM != null) {
+                AnnotatedTypeMirror expType = atypeFactory.getAnnotatedType(node);
+                areEqual(tempPostfixATM, expType, "", node);
+            } else {
+                logger.fine("can NOT find tempPosfix: " + node + "\n\n\n");
+            }
+        }
+        return super.visitUnary(node, p);
+    }
 }

@@ -1259,10 +1259,10 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
             return null;
         }
 
-        if (tree instanceof UnaryTree) {
-            handleUnaryTree(primitiveType, (UnaryTree)tree);
-            return null;
-        }
+//        if (tree instanceof UnaryTree) {
+//            handleUnaryTree(primitiveType, (UnaryTree)tree);
+//            return null;
+//        }
 
         if (tree instanceof VariableTree) {
             addPrimaryVariable(primitiveType, ((VariableTree) tree).getType());
@@ -1544,10 +1544,12 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
         }
     }
 
+    /*
     public void handleUnaryTree(AnnotatedTypeMirror atm, UnaryTree unaryTree) {
         if (unaryTree.getKind() != Tree.Kind.POSTFIX_INCREMENT &&
                 unaryTree.getKind() != Tree.Kind.POSTFIX_DECREMENT) {
-            // Only treat postfix expression tree specially
+            // Only treat postfix expression tree specially,
+            // and do nothing to other kinds of unary tree
             return;
         }
         logger.fine("handleUnaryTree: " + unaryTree + ", ATM before: " + atm);
@@ -1569,6 +1571,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
         }
         logger.fine("handleUnaryTree: " + unaryTree + ", ATM after: " + atm);
     }
+     */
 
     /**
      * If the given declaration tree of element has been previously annotated by the VariableAnnotator
