@@ -328,21 +328,23 @@ public class DefaultSlotManager implements SlotManager {
             addToVariables(refinementVariableSlot);
 
             logger.fine("create " + refinementVariableSlot + " for MISSING LOCATION");
+            logger.fine(refinementVariableSlot + "\n\n");
 
         } else if (locationCache.containsKey(location)) {
             int id = locationCache.get(location);
-            refinementVariableSlot = (RefinementVariableSlot) getVariable(id);
 
             logger.fine("Refinement for < " + location + " > already exists: ");
+            logger.fine(getVariable(id) + "\n\n");
 
+            refinementVariableSlot = (RefinementVariableSlot) getVariable(id);
         } else {
             refinementVariableSlot = new RefinementVariableSlot(location, nextId(), refined);
             addToVariables(refinementVariableSlot);
             locationCache.put(location, refinementVariableSlot.getId());
 
             logger.fine("Created refinement for < " + location + " > : ");
+            logger.fine(refinementVariableSlot + "\n\n");
         }
-        logger.fine(refinementVariableSlot + "\n\n");
         return refinementVariableSlot;
     }
 
