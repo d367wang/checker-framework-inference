@@ -201,13 +201,17 @@ public class InferenceTransfer extends CFTransfer {
             AnnotatedTypeMirror atm) {
 
         Slot slotToRefine = getInferenceAnalysis().getSlotManager().getVariableSlot(atm);
+
+        logger.fine("Creating refinement variable for tree: " + assignmentTree);
+        logger.fine("lhs: " + lhs + ", atm: " + atm);
+        logger.fine("slotToRefine: " + slotToRefine);
+
         // Getting the declared type of a RefinementVariableSlot
         // getRefined() should always return the slot of the declared type value
         if (slotToRefine instanceof RefinementVariableSlot) {
         	slotToRefine = ((RefinementVariableSlot)slotToRefine).getRefined();
         }
 
-        logger.fine("Creating refinement variable for tree: " + assignmentTree);
         RefinementVariableSlot refVar;
         if (createdRefinementVariables.containsKey(assignmentTree)) {
             refVar = createdRefinementVariables.get(assignmentTree);
