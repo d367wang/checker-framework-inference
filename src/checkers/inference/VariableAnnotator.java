@@ -1251,6 +1251,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
         if (tree instanceof VariableTree) {
             addPrimaryVariable(primitiveType, ((VariableTree) tree).getType());
         } else {
+            logger.fine("visitPrimitive ( " + primitiveType + ", " + tree + " )");
             addPrimaryVariable(primitiveType, tree);
         }
 
