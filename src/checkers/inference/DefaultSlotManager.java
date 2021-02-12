@@ -330,17 +330,20 @@ public class DefaultSlotManager implements SlotManager {
         if (location.getKind() == AnnotationLocation.Kind.MISSING) {
             //Don't cache slot for MISSING LOCATION. Just create a new one and return.
             variableSlot = new VariableSlot(location, nextId(), type);
-//            logger.fine("create " + variableSlot + " on MISSING_LOCATION: " + location);
+            logger.fine("createVariableSlot: "  + variableSlot + " on MISSING_LOCATION: " + location);
 //            printCallStack();
             addToSlots(variableSlot);
         } else if (locationCache.containsKey(location)) {
             int id = locationCache.get(location);
             variableSlot = (VariableSlot) getSlot(id);
+            logger.fine(variableSlot + " aready exists on : " + location);
         } else {
             variableSlot = new VariableSlot(location, nextId(), type);
             addToSlots(variableSlot);
             locationCache.put(location, variableSlot.getId());
+            logger.fine("createVariableSlot: "  + variableSlot + " on: " + location);
         }
+        logger.fine("\n\n");
         return variableSlot;
     }
 
@@ -362,6 +365,7 @@ public class DefaultSlotManager implements SlotManager {
             locationCache.put(location, refinementVariableSlot.getId());
             logger.fine("Created new " + refinementVariableSlot + " for the location");
         }
+        logger.fine("\n\n");
         return refinementVariableSlot;
     }
 
