@@ -562,6 +562,7 @@ public class VariableAnnotator extends AnnotatedTypeScanner<Void,Tree> {
         } else if (tree != null && realChecker.isConstant(tree) ) {
             // Considered constant by real type system
             realQualifier = realTypeFactory.getAnnotatedType(tree).getAnnotationInHierarchy(realTop);
+            logger.fine("realQualifier for LITERAL tree is: " + realQualifier + "\n");
             varSlot = slotManager.createConstantSlot(realQualifier);
         } else {
             varSlot = createVariable(location);
