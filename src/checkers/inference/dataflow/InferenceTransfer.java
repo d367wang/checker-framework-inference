@@ -97,6 +97,10 @@ public class InferenceTransfer extends CFTransfer {
         // Target tree is null for field access's
         Tree targetTree = assignmentNode.getTarget().getTree();
 
+        logger.fine("\n\n----------------visitAssignment----------------");
+        logger.fine("assignmentNode.getTree(): " + assignmentNode.getTree()
+                    + "\nassignmentNode.getTarget().getTree: " + targetTree);
+
         AnnotatedTypeMirror atm;
         if (targetTree != null) {
             // Try to use the target tree if possible.
@@ -143,7 +147,7 @@ public class InferenceTransfer extends CFTransfer {
                 || lhs.getTree().getKind() == Tree.Kind.MEMBER_SELECT) {
             // Create Refinement Variable
 
-            UnaryTree unaryTree = analysis.getUnaryTreeForAssign(assignmentNode);
+            /*
             if (unaryTree != null &&
                     (unaryTree.getKind() == Tree.Kind.POSTFIX_INCREMENT ||
                      unaryTree.getKind() == Tree.Kind.POSTFIX_DECREMENT)) {
@@ -154,6 +158,8 @@ public class InferenceTransfer extends CFTransfer {
                 AnnotatedTypeMirror refinedATM = typeFactory.getAnnotatedType(unaryTree.getExpression());
                 typeFactory.cacheTempVariableRefinedType(unaryTree, refinedATM);
             }
+            */
+
 
             final TransferResult<CFValue, CFStore> result;
             if (atm.getKind() == TypeKind.TYPEVAR) {
