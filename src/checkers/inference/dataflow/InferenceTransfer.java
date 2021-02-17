@@ -66,6 +66,9 @@ public class InferenceTransfer extends CFTransfer {
     // case where the correct, inferred RHS has no primary annotation
     private Map<Tree, Pair<RefinementVariableSlot, RefinementVariableSlot>> createdTypeVarRefinementVariables = new HashMap<>();
 
+    // Keeps a cache of pre-increment/pre-decrement state of postfix expression
+    private AnnotatedTypeMirror tempPostfixCache;
+
     public InferenceTransfer(InferenceAnalysis analysis) {
         super(analysis);
     }
@@ -93,13 +96,16 @@ public class InferenceTransfer extends CFTransfer {
     @Override
     public TransferResult<CFValue, CFStore> visitAssignment(AssignmentNode assignmentNode, TransferInput<CFValue, CFStore> transferInput) {
 
-        logger.fine("\n\n VISIT AssignmentNode: " + assignmentNode);
         Node lhs = assignmentNode.getTarget();
         CFStore store = transferInput.getRegularStore();
         InferenceAnnotatedTypeFactory typeFactory = (InferenceAnnotatedTypeFactory) analysis.getTypeFactory();
 
         // Target tree is null for field access's
         Tree targetTree = assignmentNode.getTarget().getTree();
+
+        logger.fine("\n\n----------------visitAssignment----------------");
+        logger.fine("assignmentNode.getTree(): " + assignmentNode.getTree()
+                + "\nassignmentNode.getTarget().getTree: " + targetTree);
 
         AnnotatedTypeMirror atm;
         if (targetTree != null) {
@@ -149,29 +155,29 @@ public class InferenceTransfer extends CFTransfer {
             return storeDeclaration(lhs, (VariableTree) assignmentNode.getTree(), store, typeFactory);
         } else if (lhs.getTree().getKind() == Tree.Kind.IDENTIFIER
                 || lhs.getTree().getKind() == Tree.Kind.MEMBER_SELECT) {
-            // Create Refinement Variable
 
-            logger.fine("^^^^^^^^^^^^^assignmentNode.getTree(): " + assignmentNode.getTree());
-            logger.fine("lhs.getTree(): " + lhs.getTree());
+            Tree realTree = typeFactory.getPath(assignmentNode.getTree()).getLeaf();
+            if (isPostfix(realTree)) {
+                if (tempPostfixCache != null) {
+                    // If the cache is non-null, it means the current assignment tree is `tempPostfix#num0 = x`.
+                    // DO NOT create refinement variable, but update the value of `tempPostfix#num0` with the cache.
+                    // Don't forget to reset the cache and prepare it for the next postfix expression.
+                    CFValue result = analysis.createAbstractValue(tempPostfixCache);
+                    getInferenceAnalysis().getNodeValues().put(lhs, result);
+                    store.updateForAssignment(lhs, result);
+                    // CFValue doesn't hold the reference of `tempPostfixCache`, so re-assign the cache
+                    // doesn't matter
+                    tempPostfixCache = null;
+                    logger.fine("underlying tree is UnaryTree, update node value: " + result + "\n\n");
+                    return new RegularTransferResult<CFValue, CFStore>(finishValue(result, store), store);
+                }
+                // Empty cache means the current assignment tree is `x = x + 1`,
+                // load the current refinment variable for `x` into the cache
+                // for future use.
+                tempPostfixCache = typeFactory.getAnnotatedType(((UnaryTree) realTree).getExpression());
+            }
 
-//            if (assignmentNode.getTree().getKind() ==  ||
-//                assignmentNode.getTree().getKind() == Tree.Kind.POSTFIX_DECREMENT) {
-//                Node rhs = assignmentNode.getExpression();
-//                CFValue rhsValue = transferInput.getValueOfSubNode(rhs);
-//                logger.fine("underlying tree is UnaryTree, getValueOfSubNode: " + rhsValue + "\n");
-//            }
-
-            // There are two assignments corresponding to a unary tree in form of `x++` -
-            // `x=x+1` and `tempPostfix#num0=x`. We DO NOT create refinement variable for
-            // the latter assignment.
-//            if (lhs.getTree().toString().startsWith("tempPostfix#")) {
-//                logger.fine("DO NOT create refinement variable for " + targetTree + " in " + assignmentNode);
-//                CFValue result = analysis.createAbstractValue(atm);
-//                return new RegularTransferResult<CFValue, CFStore>(finishValue(result, store), store);
-//            }
-            // Only handle the other artificial assignment corresponding to unary tree in form of `x++`
-            UnaryTree unaryTree = analysis.getUnaryTreeForAssign(assignmentNode);
-            logger.fine("analysis.getUnaryTreeForAssign( " + assignmentNode + " )" + ": " + unaryTree);
+            /*
             if (unaryTree != null &&
                     (unaryTree.getKind() == Tree.Kind.POSTFIX_INCREMENT ||
                      unaryTree.getKind() == Tree.Kind.POSTFIX_DECREMENT)) {
@@ -183,7 +189,9 @@ public class InferenceTransfer extends CFTransfer {
 //                RefinementVariableSlot slot = (RefinementVariableSlot) getInferenceAnalysis().getSlotManager().getVariableSlot(refinedATM);
                 typeFactory.cacheTempVariableRefinedType(unaryTree, refinedATM);
             }
+             */
 
+            // Create Refinement Variable
             final TransferResult<CFValue, CFStore> result;
             if (atm.getKind() == TypeKind.TYPEVAR) {
                 result = createTypeVarRefinementVars(assignmentNode.getTarget(), assignmentNode.getTree(),
@@ -429,5 +437,10 @@ public class InferenceTransfer extends CFTransfer {
     public TransferResult<CFValue, CFStore> visitLocalVariable(LocalVariableNode n, TransferInput<CFValue, CFStore> in) {
         logger.fine("Transfer Function for LocalVariableNode: " + n);
         return super.visitLocalVariable(n, in);
+    }
+
+    private boolean isPostfix(Tree node) {
+        return node.getKind() == Tree.Kind.POSTFIX_INCREMENT ||
+                node.getKind() == Tree.Kind.POSTFIX_DECREMENT;
     }
 }
